@@ -2,15 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/color.h>
 #include <base/math.h>
-
 #include <engine/console.h>
-#include <engine/graphics.h>
-
-#include "editor.h"
 #include <generated/client_data.h>
 #include <game/client/localization.h>
-#include <game/client/render.h>
-
+#include "editor.h"
 
 CLayerQuads::CLayerQuads()
 {
@@ -25,14 +20,7 @@ CLayerQuads::~CLayerQuads()
 
 void CLayerQuads::Render()
 {
-	Graphics()->TextureClear();
-	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
-		Graphics()->TextureSet(m_pEditor->m_Map.m_lImages[m_Image]->m_Texture);
 
-	//Graphics()->BlendNone();
-	//m_pEditor->RenderTools()->RenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
-	Graphics()->BlendNormal();
-	m_pEditor->RenderTools()->RenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
 }
 
 CQuad *CLayerQuads::NewQuad()
@@ -80,18 +68,7 @@ CQuad *CLayerQuads::NewQuad()
 
 void CLayerQuads::BrushSelecting(CUIRect Rect)
 {
-	// draw selection rectangle
-	vec4 RectColor = HexToRgba(g_Config.m_EdColorSelectionQuad);
-	IGraphics::CLineItem Array[4] = {
-		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x+Rect.w, Rect.y),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y, Rect.x+Rect.w, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x+Rect.w, Rect.y+Rect.h, Rect.x, Rect.y+Rect.h),
-		IGraphics::CLineItem(Rect.x, Rect.y+Rect.h, Rect.x, Rect.y)};
-	Graphics()->TextureClear();
-	Graphics()->LinesBegin();
-	Graphics()->SetColor(RectColor.r*RectColor.a, RectColor.g*RectColor.a, RectColor.b*RectColor.a, RectColor.a);
-	Graphics()->LinesDraw(Array, 4);
-	Graphics()->LinesEnd();
+
 }
 
 int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
@@ -200,32 +177,6 @@ extern int gs_SelectedPoints;
 
 int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
-	// layer props
-	enum
-	{
-		PROP_IMAGE=0,
-		NUM_PROPS,
-	};
-
-	CProperty aProps[] = {
-		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
-		{0},
-	};
-
-	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != -1)
-		m_pEditor->m_Map.m_Modified = true;
-
-	if(Prop == PROP_IMAGE)
-	{
-		if(NewVal >= 0)
-			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
-		else
-			m_Image = -1;
-	}
-
 	return 0;
 }
 
