@@ -58,211 +58,30 @@ const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
 
 void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, float ButtonHeight, float Spaceing)
 {
-	for (int i = Start; i < Stop; i++)
-	{
-		View.HSplitTop(Spaceing, 0, &View);
 
-		CKeyInfo &Key = gs_aKeys[i];
-		CUIRect Button, Label;
-		View.HSplitTop(ButtonHeight, &Button, &View);
-		RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-
-		Button.VSplitMid(&Label, &Button);
-
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", (const char *)Key.m_Name);
-
-		Label.y += 2.0f;
-		UI()->DoLabelScaled(&Label, aBuf, 13.0f, CUI::ALIGN_CENTER);
-		int OldId = Key.m_KeyId;
-		int NewId = DoKeyReader(&gs_aKeys[i].m_BC, &Button, OldId);
-		if(NewId != OldId)
-		{
-			if(OldId != 0 || NewId == 0)
-				m_pClient->m_pBinds->Bind(OldId, "");
-			if(NewId != 0)
-				m_pClient->m_pBinds->Bind(NewId, gs_aKeys[i].m_pCommand);
-		}
-	}
 }
 
 float CMenus::RenderSettingsControlsMovement(CUIRect View, void *pUser)
 {
-	CMenus *pSelf = (CMenus*)pUser;
-
-	// this is kinda slow, but whatever
-	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = 0;
-
-	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
-	{
-		const char *pBind = pSelf->m_pClient->m_pBinds->Get(KeyId);
-		if(!pBind[0])
-			continue;
-
-		for(int i = 0; i < g_KeyCount; i++)
-			if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
-			{
-				gs_aKeys[i].m_KeyId = KeyId;
-				break;
-			}
-	}
-
-	int NumOptions = 6;
-	float ButtonHeight = 20.0f;
-	float Spaceing = 2.0f;
-	float BackgroundHeight = (float)NumOptions*ButtonHeight+(float)NumOptions*Spaceing;
-
-	View.HSplitTop(BackgroundHeight, &View, 0);
-	pSelf->RenderTools()->DrawUIRect(&View, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_B, 5.0f);
-
-	CUIRect Button;
-	View.HSplitTop(Spaceing, 0, &View);
-	View.HSplitTop(ButtonHeight, &Button, &View);
-	pSelf->DoScrollbarOption(&g_Config.m_InpMousesens, &g_Config.m_InpMousesens, &Button, Localize("Mouse sens."), 150.0f, 5, 500);
-
-	pSelf->UiDoGetButtons(0, 5, View, ButtonHeight, Spaceing);
-
-	return BackgroundHeight;
+	return 0.0f;
 }
 
 float CMenus::RenderSettingsControlsWeapon(CUIRect View, void *pUser)
 {
-	CMenus *pSelf = (CMenus*)pUser;
-
-	// this is kinda slow, but whatever
-	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = 0;
-
-	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
-	{
-		const char *pBind = pSelf->m_pClient->m_pBinds->Get(KeyId);
-		if(!pBind[0])
-			continue;
-
-		for(int i = 0; i < g_KeyCount; i++)
-			if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
-			{
-				gs_aKeys[i].m_KeyId = KeyId;
-				break;
-			}
-	}
-
-	int NumOptions = 7;
-	float ButtonHeight = 20.0f;
-	float Spaceing = 2.0f;
-	float BackgroundHeight = (float)NumOptions*ButtonHeight+(float)NumOptions*Spaceing;
-
-	View.HSplitTop(BackgroundHeight, &View, 0);
-	pSelf->RenderTools()->DrawUIRect(&View, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_B, 5.0f);
-
-	pSelf->UiDoGetButtons(5, 12, View, ButtonHeight, Spaceing);
-
-	return BackgroundHeight;
+	return 0.0f;
 }
 
 float CMenus::RenderSettingsControlsVoting(CUIRect View, void *pUser)
 {
-	CMenus *pSelf = (CMenus*)pUser;
-
-	// this is kinda slow, but whatever
-	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = 0;
-
-	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
-	{
-		const char *pBind = pSelf->m_pClient->m_pBinds->Get(KeyId);
-		if(!pBind[0])
-			continue;
-
-		for(int i = 0; i < g_KeyCount; i++)
-			if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
-			{
-				gs_aKeys[i].m_KeyId = KeyId;
-				break;
-			}
-	}
-
-	int NumOptions = 2;
-	float ButtonHeight = 20.0f;
-	float Spaceing = 2.0f;
-	float BackgroundHeight = (float)NumOptions*ButtonHeight+(float)NumOptions*Spaceing;
-
-	View.HSplitTop(BackgroundHeight, &View, 0);
-	pSelf->RenderTools()->DrawUIRect(&View, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_B, 5.0f);
-
-	pSelf->UiDoGetButtons(12, 14, View, ButtonHeight, Spaceing);
-
-	return BackgroundHeight;
+	return 0.0f;
 }
 
 float CMenus::RenderSettingsControlsChat(CUIRect View, void *pUser)
 {
-	CMenus *pSelf = (CMenus*)pUser;
-
-	// this is kinda slow, but whatever
-	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = 0;
-
-	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
-	{
-		const char *pBind = pSelf->m_pClient->m_pBinds->Get(KeyId);
-		if(!pBind[0])
-			continue;
-
-		for(int i = 0; i < g_KeyCount; i++)
-			if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
-			{
-				gs_aKeys[i].m_KeyId = KeyId;
-				break;
-			}
-	}
-
-	int NumOptions = 4;
-	float ButtonHeight = 20.0f;
-	float Spaceing = 2.0f;
-	float BackgroundHeight = (float)NumOptions*ButtonHeight+(float)NumOptions*Spaceing;
-
-	View.HSplitTop(BackgroundHeight, &View, 0);
-	pSelf->RenderTools()->DrawUIRect(&View, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_B, 5.0f);
-
-	pSelf->UiDoGetButtons(14, 18, View, ButtonHeight, Spaceing);
-
-	return BackgroundHeight;
+	return 0.0f;
 }
 
 float CMenus::RenderSettingsControlsMisc(CUIRect View, void *pUser)
 {
-	CMenus *pSelf = (CMenus*)pUser;
-
-	// this is kinda slow, but whatever
-	for(int i = 0; i < g_KeyCount; i++)
-		gs_aKeys[i].m_KeyId = 0;
-
-	for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
-	{
-		const char *pBind = pSelf->m_pClient->m_pBinds->Get(KeyId);
-		if(!pBind[0])
-			continue;
-
-		for(int i = 0; i < g_KeyCount; i++)
-			if(str_comp(pBind, gs_aKeys[i].m_pCommand) == 0)
-			{
-				gs_aKeys[i].m_KeyId = KeyId;
-				break;
-			}
-	}
-
-	int NumOptions = 11;
-	int StartOption = 18;
-	float ButtonHeight = 20.0f;
-	float Spaceing = 2.0f;
-	float BackgroundHeight = (float)NumOptions*ButtonHeight+(float)NumOptions*Spaceing;
-
-	View.HSplitTop(BackgroundHeight, &View, 0);
-	pSelf->RenderTools()->DrawUIRect(&View, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_B, 5.0f);
-
-	pSelf->UiDoGetButtons(StartOption, StartOption+NumOptions, View, ButtonHeight, Spaceing);
-
-	return BackgroundHeight;
+	return 0.0f;
 }
