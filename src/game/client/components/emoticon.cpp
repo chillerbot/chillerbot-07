@@ -47,44 +47,12 @@ void CEmoticon::OnMessage(int MsgType, void *pRawMsg)
 
 bool CEmoticon::OnMouseMove(float x, float y)
 {
-	if(!m_Active)
-		return false;
-
-	UI()->ConvertMouseMove(&x, &y);
-	m_SelectorMouse += vec2(x,y);
 	return true;
 }
 
 void CEmoticon::DrawCircle(float x, float y, float r, int Segments)
 {
-	IGraphics::CFreeformItem Array[32];
-	int NumItems = 0;
-	float FSegments = (float)Segments;
-	for(int i = 0; i < Segments; i+=2)
-	{
-		float a1 = i/FSegments * 2*pi;
-		float a2 = (i+1)/FSegments * 2*pi;
-		float a3 = (i+2)/FSegments * 2*pi;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
 
-		Array[NumItems++] = IGraphics::CFreeformItem(
-			x, y,
-			x+Ca1*r, y+Sa1*r,
-			x+Ca3*r, y+Sa3*r,
-			x+Ca2*r, y+Sa2*r);
-		if(NumItems == 32)
-		{
-			m_pClient->Graphics()->QuadsDrawFreeform(Array, 32);
-			NumItems = 0;
-		}
-	}
-	if(NumItems)
-		m_pClient->Graphics()->QuadsDrawFreeform(Array, NumItems);
 }
 
 

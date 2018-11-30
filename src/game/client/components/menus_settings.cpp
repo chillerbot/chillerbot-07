@@ -45,27 +45,7 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 	return false;
 }
 
-int CMenus::DoButton_Customize(CButtonContainer *pBC, IGraphics::CTextureHandle Texture, int SpriteID, const CUIRect *pRect, float ImageRatio)
-{
-	return 0;
-}
-
 void CMenus::SaveSkinfile()
-{
-
-}
-
-void CMenus::RenderHSLPicker(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSkinSelection(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSkinPartSelection(CUIRect MainView)
 {
 
 }
@@ -136,60 +116,4 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<
 
 	// clean up
 	json_value_free(pJsonData);
-}
-
-void CMenus::RenderLanguageSelection(CUIRect MainView, bool Header)
-{
-
-}
-
-void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
-{
-
-}
-
-void CMenus::RenderSettingsGeneral(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSettingsPlayer(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSettingsTeeCustom(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSettingsTee(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSettingsControls(CUIRect MainView)
-{
-
-}
-
-bool CMenus::DoResolutionList(CUIRect* pRect, CListBoxState* pListBoxState,
-							  const sorted_array<CVideoMode>& lModes)
-{
-	return false;
-}
-
-void CMenus::RenderSettingsGraphics(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSettingsSound(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderSettings(CUIRect MainView)
-{
-
 }

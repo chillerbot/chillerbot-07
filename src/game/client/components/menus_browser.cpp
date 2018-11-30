@@ -17,14 +17,6 @@
 
 #include "menus.h"
 
-CMenus::CColumn CMenus::ms_aBrowserCols[] = {
-	{COL_BROWSER_FLAG,		-1,									" ",		-1, 87.0f, 0, {0}, {0}}, // Localize - these strings are localized within CLocConstString
-	{COL_BROWSER_NAME,		IServerBrowser::SORT_NAME,			"Server",		0, 300.0f, 0, {0}, {0}},
-	{COL_BROWSER_GAMETYPE,	IServerBrowser::SORT_GAMETYPE,		"Type",		1, 70.0f, 0, {0}, {0}},
-	{COL_BROWSER_MAP,		IServerBrowser::SORT_MAP,			"Map",		1, 100.0f, 0, {0}, {0}},
-	{COL_BROWSER_PLAYERS,	IServerBrowser::SORT_NUMPLAYERS,	"Players",	1, 60.0f, 0, {0}, {0}},
-	{COL_BROWSER_PING,		IServerBrowser::SORT_PING,			"Ping",		1, 40.0f, 0, {0}, {0}},
-};
 
 CServerFilterInfo CMenus::CBrowserFilter::ms_FilterStandard = {IServerBrowser::FILTER_COMPAT_VERSION|IServerBrowser::FILTER_PURE|IServerBrowser::FILTER_PURE_MAP, 999, -1, 0, {0}, 0};
 CServerFilterInfo CMenus::CBrowserFilter::ms_FilterFavorites = {IServerBrowser::FILTER_COMPAT_VERSION|IServerBrowser::FILTER_FAVORITE, 999, -1, 0, {0}, 0};
@@ -351,56 +343,7 @@ void CMenus::SetOverlay(int Type, float x, float y, const void *pData)
 }
 
 // 1 = browser entry click, 2 = server info click
-int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEntry, const CBrowserFilter *pFilter, bool Selected)
-{
-	return 0;
-}
-
-bool CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
-{
-	return false;
-}
-
 void CMenus::RenderServerbrowserOverlay()
-{
-
-}
-
-void CMenus::RenderServerbrowserServerList(CUIRect View)
-{
-
-}
-
-void CMenus::RenderServerbrowserSidebar(CUIRect View)
-{
-
-}
-
-void CMenus::RenderServerbrowserFriendTab(CUIRect View)
-{
-
-}
-
-void CMenus::RenderServerbrowserFilterTab(CUIRect View)
-{
-}
-
-void CMenus::RenderServerbrowserInfoTab(CUIRect View)
-{
-
-}
-
-void CMenus::RenderDetailInfo(CUIRect View, const CServerInfo *pInfo)
-{
-
-}
-
-void CMenus::RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int Column)
-{
-
-}
-
-void CMenus::RenderServerbrowserServerDetail(CUIRect View, const CServerInfo *pInfo)
 {
 
 }
@@ -408,16 +351,6 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View, const CServerInfo *pI
 void CMenus::FriendlistOnUpdate()
 {
 	// fill me
-}
-
-void CMenus::RenderServerbrowserBottomBox(CUIRect MainView)
-{
-
-}
-
-void CMenus::RenderServerbrowser(CUIRect MainView)
-{
-
 }
 
 void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

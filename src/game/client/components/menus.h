@@ -37,73 +37,17 @@ public:
 	};
 
 private:
-	typedef float (*FDropdownCallback)(CUIRect View, void *pUser);
-
 	float ButtonFade(CButtonContainer *pBC, float Seconds, int Checked=0);
 
-
-	int DoButton_DemoPlayer(CButtonContainer *pBC, const char *pText, const CUIRect *pRect);
-	int DoButton_SpriteID(CButtonContainer *pBC, int ImageID, int SpriteID, bool Checked, const CUIRect *pRect, int Corners=CUI::CORNER_ALL, float r=5.0f, bool Fade=true);
-	int DoButton_SpriteClean(int ImageID, int SpriteID, const CUIRect *pRect);
-	int DoButton_SpriteCleanID(const void *pID, int ImageID, int SpriteID, const CUIRect *pRect, bool Blend=true);
-	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
-	int DoButton_Menu(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName=0, int Corners=CUI::CORNER_ALL, float r=5.0f, float FontFactor=0.0f, vec4 ColorHot=vec4(1.0f, 1.0f, 1.0f, 0.75f), bool TextFade=true);
-	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners);
-	int DoButton_MenuTabTop(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect, float Alpha=1.0f, float FontAlpha=1.0f, int Corners=CUI::CORNER_ALL, float r=5.0f, float FontFactor=0.0f);
-	void DoButton_MenuTabTop_Dummy(const char *pText, int Checked, const CUIRect *pRect, float Alpha);
-	int DoButton_Customize(CButtonContainer *pBC, IGraphics::CTextureHandle Texture, int SpriteID, const CUIRect *pRect, float ImageRatio);
-
-	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect, bool Checked=false);
-	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-
-	int DoButton_MouseOver(int ImageID, int SpriteID, const CUIRect *pRect);
-
-	/*static void ui_draw_menu_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_keyselect_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_menu_tab_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_settings_tab_button(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	*/
-
-	int DoIcon(int ImageId, int SpriteId, const CUIRect *pRect);
-	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoButton_GridHeaderIcon(CButtonContainer *pBC, int ImageID, int SpriteID, const CUIRect *pRect, int Corners);
-
-	//static void ui_draw_browse_icon(int what, const CUIRect *r);
-	//static void ui_draw_grid_header(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-
-	/*static void ui_draw_checkbox_common(const void *id, const char *text, const char *boxtext, const CUIRect *r, const void *extra);
-	static void ui_draw_checkbox(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	static void ui_draw_checkbox_number(const void *id, const char *text, int checked, const CUIRect *r, const void *extra);
-	*/
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden=false, int Corners=CUI::CORNER_ALL);
-	void DoEditBoxOption(void *pID, char *pOption, int OptionLength, const CUIRect *pRect, const char *pStr, float VSplitVal, float *pOffset, bool Hidden=false);
-	void DoScrollbarOption(void *pID, int *pOption, const CUIRect *pRect, const char *pStr, float VSplitVal, int Min, int Max, bool infinite=false);
-	float DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback);
-	float DoIndependentDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, bool* pActive);
-	void DoInfoBox(const CUIRect *pRect, const char *pLable, const char *pValue);
-	//static int ui_do_edit_box(void *id, const CUIRect *rect, char *str, unsigned str_size, float font_size, bool hidden=false);
-
-	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
-	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current);
-	void DoButton_KeySelect(CButtonContainer *pBC, const char *pText, int Checked, const CUIRect *pRect);
-	int DoKeyReader(CButtonContainer *pPC, const CUIRect *pRect, int Key);
-
-	//static int ui_do_key_reader(void *id, const CUIRect *rect, int key);
-	void UiDoGetButtons(int Start, int Stop, CUIRect View, float ButtonHeight, float Spacing);
 
 	struct CListboxItem
 	{
 		int m_Visible;
 		int m_Selected;
-		CUIRect m_Rect;
-		CUIRect m_HitRect;
 	};
 
 	struct CListBoxState
 	{
-		CUIRect m_ListBoxOriginalView;
-		CUIRect m_ListBoxView;
 		float m_ListBoxRowHeight;
 		int m_ListBoxItemIndex;
 		int m_ListBoxSelectedIndex;
@@ -120,13 +64,7 @@ private:
 		}
 	};
 
-	void UiDoListboxHeader(CListBoxState* pState, const CUIRect *pRect, const char *pTitle, float HeaderHeight, float Spacing);
-	void UiDoListboxStart(CListBoxState* pState, const void *pID, float RowHeight, const char *pBottomText, int NumItems,
-						int ItemsPerRow, int SelectedIndex, const CUIRect *pRect=0, bool Background=true);
 	int UiDoListboxEnd(CListBoxState* pState, bool *pItemActivated);
-
-	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
-	//static void demolist_list_callback(const CUIRect *rect, int index, void *user);
 
 	enum
 	{
@@ -446,8 +384,6 @@ private:
 		int m_Direction;
 		float m_Width;
 		int m_Flags;
-		CUIRect m_Rect;
-		CUIRect m_Spacer;
 	};
 
 	static CColumn ms_aBrowserCols[NUM_BROWSER_COLS];
@@ -479,81 +415,18 @@ private:
 	int Render();
 	//void render_background();
 	//void render_loading(float percent);
-	void RenderMenubar(CUIRect r);
-	void RenderNews(CUIRect MainView);
-	void RenderBackButton(CUIRect MainView);
-
-	// found in menus_demo.cpp
-	void RenderDemoPlayer(CUIRect MainView);
-	void RenderDemoList(CUIRect MainView);
-
-	// found in menus_start.cpp
-	void RenderStartMenu(CUIRect MainView);
-	void RenderLogo(CUIRect MainView);
-
-	// found in menus_ingame.cpp
-	void RenderGame(CUIRect MainView);
-	void RenderPlayers(CUIRect MainView);
-	void RenderServerInfo(CUIRect MainView);
-	void HandleCallvote(int Page, bool Force);
-	void RenderServerControl(CUIRect MainView);
-	void RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
-	void RenderServerControlServer(CUIRect MainView);
-
-	// found in menus_browser.cpp
-	// int m_ScrollOffset;
-	void RenderServerbrowserServerList(CUIRect View);
-	void RenderServerbrowserSidebar(CUIRect View);
-	void RenderServerbrowserFriendTab(CUIRect View);
-	void RenderServerbrowserFilterTab(CUIRect View);
-	void RenderServerbrowserInfoTab(CUIRect View);
-	void RenderServerbrowserFriendList(CUIRect View);
-	void RenderDetailInfo(CUIRect View, const CServerInfo *pInfo);
-	void RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int Column);
-	void RenderServerbrowserServerDetail(CUIRect View, const CServerInfo *pInfo);
-	//void RenderServerbrowserFriends(CUIRect View);
-	void RenderServerbrowserBottomBox(CUIRect View);
 	void RenderServerbrowserOverlay();
-	bool RenderFilterHeader(CUIRect View, int FilterIndex);
-	int DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEntry, const CBrowserFilter *pFilter, bool Selected);
-	void RenderServerbrowser(CUIRect MainView);
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainToggleMusic(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	void DoFriendListEntry(CUIRect *pView, CFriendItem *pFriend, const void *pID, const CFriendInfo *pFriendInfo, const CServerInfo *pServerInfo, bool Checked, bool Clan = false);
 	void SetOverlay(int Type, float x, float y, const void *pData);
 	void UpdateFriendCounter(const CServerInfo *pEntry);
 	void UpdateFriends();
 
 	// found in menus_settings.cpp
-	void RenderLanguageSelection(CUIRect MainView, bool Header=true);
-	void RenderThemeSelection(CUIRect MainView, bool Header=true);
-	void RenderHSLPicker(CUIRect Picker);
-	void RenderSkinSelection(CUIRect MainView);
-	void RenderSkinPartSelection(CUIRect MainView);
-	void RenderSettingsGeneral(CUIRect MainView);
-	void RenderSettingsPlayer(CUIRect MainView);
-	void RenderSettingsTee(CUIRect MainView);
-	void RenderSettingsTeeBasic(CUIRect MainView);
-	void RenderSettingsTeeCustom(CUIRect MainView);
-	void RenderSettingsControls(CUIRect MainView);
-	void RenderSettingsGraphics(CUIRect MainView);
-	void RenderSettingsSound(CUIRect MainView);
-	void RenderSettings(CUIRect MainView);
-
-	bool DoResolutionList(CUIRect* pRect, CListBoxState* pListBoxState,
-						  const sorted_array<CVideoMode>& lModes);
-
-	// found in menu_callback.cpp
-	static float RenderSettingsControlsMovement(CUIRect View, void *pUser);
-	static float RenderSettingsControlsWeapon(CUIRect View, void *pUser);
-	static float RenderSettingsControlsVoting(CUIRect View, void *pUser);
-	static float RenderSettingsControlsChat(CUIRect View, void *pUser);
-	static float RenderSettingsControlsMisc(CUIRect View, void *pUser);
 
 	void SetActive(bool Active);
 
-	void InvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CMenus *pMenu, CUIRect Rect), void *pExtra=0);
 	void DoPopupMenu();
 
 	IGraphics::CTextureHandle m_TextureBlob;

@@ -50,11 +50,6 @@ void CSpectator::OnConsoleInit()
 
 bool CSpectator::OnMouseMove(float x, float y)
 {
-	if(!m_Active)
-		return false;
-
-	UI()->ConvertMouseMove(&x, &y);
-	m_SelectorMouse += vec2(x,y);
 	return true;
 }
 

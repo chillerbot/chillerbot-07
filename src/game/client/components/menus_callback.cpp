@@ -55,33 +55,3 @@ static CKeyInfo gs_aKeys[] =
 */
 
 const int g_KeyCount = sizeof(gs_aKeys) / sizeof(CKeyInfo);
-
-void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, float ButtonHeight, float Spaceing)
-{
-
-}
-
-float CMenus::RenderSettingsControlsMovement(CUIRect View, void *pUser)
-{
-	return 0.0f;
-}
-
-float CMenus::RenderSettingsControlsWeapon(CUIRect View, void *pUser)
-{
-	return 0.0f;
-}
-
-float CMenus::RenderSettingsControlsVoting(CUIRect View, void *pUser)
-{
-	return 0.0f;
-}
-
-float CMenus::RenderSettingsControlsChat(CUIRect View, void *pUser)
-{
-	return 0.0f;
-}
-
-float CMenus::RenderSettingsControlsMisc(CUIRect View, void *pUser)
-{
-	return 0.0f;
-}
