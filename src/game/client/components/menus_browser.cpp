@@ -10,13 +10,9 @@
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
-
 #include <generated/client_data.h>
 #include <generated/protocol.h>
-
 #include <game/version.h>
-#include <game/client/render.h>
-#include <game/client/ui.h>
 #include <game/client/components/countryflags.h>
 
 #include "menus.h"

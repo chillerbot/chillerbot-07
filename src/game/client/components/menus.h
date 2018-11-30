@@ -5,15 +5,11 @@
 
 #include <base/vmath.h>
 #include <base/tl/sorted_array.h>
-
-#include <engine/graphics.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
-
 #include <game/voting.h>
 #include <game/client/component.h>
 #include <game/client/localization.h>
-#include <game/client/ui.h>
 
 #include "skins.h"
 

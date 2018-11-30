@@ -2,16 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/math.h>
-
 #include <engine/demo.h>
 #include <engine/keys.h>
 #include <engine/storage.h>
-
-#include <game/client/render.h>
 #include <game/client/gameclient.h>
-
-#include <game/client/ui.h>
-
 #include <generated/client_data.h>
 
 #include "maplayers.h"
