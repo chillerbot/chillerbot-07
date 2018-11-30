@@ -3,8 +3,8 @@
 #include <math.h>
 #include <base/math.h>
 #include <base/tl/base.h>
+#include <base/vmath.h>
 
-#include "render.h"
 
 void ValidateFCurve(const vec2& p0, vec2& p1, vec2& p2, const vec2& p3)
 {
@@ -122,28 +122,4 @@ float SolveBezier(float x, float p0, float p1, float p2, float p3)
 				return -s*cos(phi-pi/3) - sub;
 		}
 	}
-}
-
-void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, float Time, float *pResult)
-{
-	return;
-}
-
-static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
-{
-	int x = pPoint->x - pCenter->x;
-	int y = pPoint->y - pCenter->y;
-	pPoint->x = (int)(x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
-	pPoint->y = (int)(x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
-}
-
-void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
-{
-
-}
-
-void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags,
-									ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
-{
-
 }

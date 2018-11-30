@@ -56,12 +56,6 @@ CLayerGroup::~CLayerGroup()
 	Clear();
 }
 
-void CLayerGroup::Convert(CUIRect *pRect)
-{
-	pRect->x += m_OffsetX;
-	pRect->y += m_OffsetY;
-}
-
 void CLayerGroup::Mapping(float *pPoints)
 {
 
@@ -116,42 +110,7 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 
 void CEditorImage::AnalyseTileFlags()
 {
-	if(m_Format == CImageInfo::FORMAT_RGB)
-	{
-		for(int i = 0; i < 256; ++i)
-			m_aTileFlags[i] = TILEFLAG_OPAQUE;
-	}
-	else
-	{
-		mem_zero(m_aTileFlags, sizeof(m_aTileFlags));
 
-		int tw = m_Width/16; // tilesizes
-		int th = m_Height/16;
-		if(tw == th)
-		{
-			unsigned char *pPixelData = (unsigned char *)m_pData;
-
-			int TileID = 0;
-			for(int ty = 0; ty < 16; ty++)
-				for(int tx = 0; tx < 16; tx++, TileID++)
-				{
-					bool Opaque = true;
-					for(int x = 0; x < tw; x++)
-						for(int y = 0; y < th; y++)
-						{
-							int p = (ty*tw+y)*m_Width + tx*tw+x;
-							if(pPixelData[p*4+3] < 250)
-							{
-								Opaque = false;
-								break;
-							}
-						}
-
-					if(Opaque)
-						m_aTileFlags[TileID] |= TILEFLAG_OPAQUE;
-				}
-		}
-	}
 }
 
 void CEditorImage::LoadAutoMapper()
@@ -231,19 +190,9 @@ void CEditor::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pU
  OTHER
 *********************************************************/
 
-int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
-{
-	return 0;
-}
-
 vec4 CEditor::ButtonColorMul(const void *pID)
 {
 	return vec4(1,1,1,1);
-}
-
-float CEditor::UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
-{
-	return 0.0f;
 }
 
 vec4 CEditor::GetButtonColor(const void *pID, int Checked)
@@ -251,70 +200,9 @@ vec4 CEditor::GetButtonColor(const void *pID, int Checked)
 	return vec4(1,1,1,0.5f);
 }
 
-int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
-
-int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
-int CEditor::DoButton_Image(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, bool Used)
-{
-	return 0;
-}
-
-int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
-int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
-int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
-int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
-int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize)
-{
-	return 0;
-}
-
-int CEditor::DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
-int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	return 0;
-}
-
 void CEditor::RenderGrid(CLayerGroup *pGroup)
 {
 
-}
-
-void CEditor::RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness)
-{
-
-}
-
-int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip)
-{
-	return 0;
 }
 
 CLayerGroup *CEditor::GetSelectedGroup()
@@ -352,32 +240,12 @@ void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 
 }
 
-void CEditor::DoToolbar(CUIRect ToolBar)
-{
-
-}
-
 void CEditor::DoQuad(CQuad *q, int Index)
 {
 
 }
 
 void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
-{
-
-}
-
-void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, IGraphics::CTextureHandle Texture)
-{
-
-}
-
-void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
-{
-
-}
-
-void CEditor::RenderLayers(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 {
 
 }
@@ -390,11 +258,6 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 {
 
-}
-
-int CEditor::PopupImage(CEditor *pEditor, CUIRect View)
-{
-	return 0;
 }
 
 static int CompareImageName(const void *pObject1, const void *pObject2)
@@ -442,12 +305,6 @@ void CEditor::SortImages()
 }
 
 
-void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
-{
-
-}
-
-
 static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor*)pUser;
@@ -470,11 +327,6 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 	pEditor->m_FileList.add(Item);
 
 	return 0;
-}
-
-void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
-{
-
 }
 
 void CEditor::RenderFileDialog()
@@ -526,115 +378,6 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	m_Dialog = DIALOG_FILE;
 }
 
-
-void CEditor::RenderModebar(CUIRect View)
-{
-
-}
-
-void CEditor::RenderStatusbar(CUIRect View)
-{
-
-}
-
-void CEditor::RenderEnvelopeEditor(CUIRect View)
-{
-
-}
-
-int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View)
-{
-	static int s_NewMapButton = 0;
-	static int s_SaveButton = 0;
-	static int s_SaveAsButton = 0;
-	static int s_OpenButton = 0;
-	static int s_AppendButton = 0;
-	static int s_ExitButton = 0;
-
-	CUIRect Slot;
-	View.HSplitTop(2.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, 0, "Creates a new map"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_NEW;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-		{
-			pEditor->Reset();
-			pEditor->m_aFileName[0] = 0;
-		}
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load", 0, &Slot, 0, "Opens a map for editing"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_LOAD;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_AppendButton, "Append", 0, &Slot, 0, "Opens a map and adds everything from that map to the current one"))
-	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", "", pEditor->CallbackAppendMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_SaveButton, "Save", 0, &Slot, 0, "Saves the current map"))
-	{
-		if(pEditor->m_aFileName[0] && pEditor->m_ValidSaveFilename)
-		{
-			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName, sizeof(pEditor->m_aFileSaveName));
-			pEditor->m_PopupEventType = POPEVENT_SAVE;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(2.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_SaveAsButton, "Save As", 0, &Slot, 0, "Saves the current map under a new name"))
-	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_ExitButton, "Exit", 0, &Slot, 0, "Exits from the editor"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_EXIT;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			g_Config.m_ClEditor = 0;
-		return 1;
-	}
-
-	return 0;
-}
-
-void CEditor::RenderMenubar(CUIRect MenuBar)
-{
-
-}
 
 void CEditor::Render()
 {
@@ -697,15 +440,12 @@ void CEditor::ZoomMouseTarget(float ZoomFactor)
 	// zoom to the current mouse position
 	// get absolute mouse position
 	float aPoints[4];
-	RenderTools()->MapScreenToWorld(
-		m_WorldOffsetX, m_WorldOffsetY,
-		1.0f, 1.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
 
 	float WorldWidth = aPoints[2]-aPoints[0];
 	float WorldHeight = aPoints[3]-aPoints[1];
 
-	float Mwx = aPoints[0] + WorldWidth * (UI()->MouseX()/UI()->Screen()->w);
-	float Mwy = aPoints[1] + WorldHeight * (UI()->MouseY()/UI()->Screen()->h);
+	float Mwx = 0.0f;
+	float Mwy = 0.0f;
 
 	// adjust camera
 	m_WorldOffsetX += (Mwx-m_WorldOffsetX) * (1-ZoomFactor);
@@ -753,7 +493,6 @@ void CEditorMap::MakeGameLayer(CLayer *pLayer)
 {
 	m_pGameLayer = (CLayerGame *)pLayer;
 	m_pGameLayer->m_pEditor = m_pEditor;
-	m_pGameLayer->m_Texture = m_pEditor->m_EntitiesTexture;
 }
 
 void CEditorMap::MakeGameGroup(CLayerGroup *pGroup)

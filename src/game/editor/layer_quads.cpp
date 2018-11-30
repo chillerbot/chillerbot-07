@@ -66,44 +66,6 @@ CQuad *CLayerQuads::NewQuad()
 	return q;
 }
 
-void CLayerQuads::BrushSelecting(CUIRect Rect)
-{
-
-}
-
-int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
-{
-	// create new layers
-	CLayerQuads *pGrabbed = new CLayerQuads();
-	pGrabbed->m_pEditor = m_pEditor;
-	pGrabbed->m_Image = m_Image;
-	pBrush->AddLayer(pGrabbed);
-
-	//dbg_msg("", "%f %f %f %f", rect.x, rect.y, rect.w, rect.h);
-	for(int i = 0; i < m_lQuads.size(); i++)
-	{
-		CQuad *q = &m_lQuads[i];
-		float px = fx2f(q->m_aPoints[4].x);
-		float py = fx2f(q->m_aPoints[4].y);
-
-		if(px > Rect.x && px < Rect.x+Rect.w && py > Rect.y && py < Rect.y+Rect.h)
-		{
-			CQuad n;
-			n = *q;
-
-			for(int p = 0; p < 5; p++)
-			{
-				n.m_aPoints[p].x -= f2fx(Rect.x);
-				n.m_aPoints[p].y -= f2fx(Rect.y);
-			}
-
-			pGrabbed->m_lQuads.add(n);
-		}
-	}
-
-	return pGrabbed->m_lQuads.size()?1:0;
-}
-
 void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 {
 	CLayerQuads *l = (CLayerQuads *)pBrush;
@@ -174,12 +136,6 @@ void CLayerQuads::GetSize(float *w, float *h) const
 }
 
 extern int gs_SelectedPoints;
-
-int CLayerQuads::RenderProperties(CUIRect *pToolBox)
-{
-	return 0;
-}
-
 
 void CLayerQuads::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 {

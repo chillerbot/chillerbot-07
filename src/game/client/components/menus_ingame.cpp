@@ -7,13 +7,10 @@
 #include <engine/friends.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
-
 #include <generated/protocol.h>
 #include <generated/client_data.h>
-
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
 
 #include "menus.h"
 #include "motd.h"

@@ -157,113 +157,6 @@ void CLayerTiles::Render()
 int CLayerTiles::ConvertX(float x) const { return (int)(x/32.0f); }
 int CLayerTiles::ConvertY(float y) const { return (int)(y/32.0f); }
 
-void CLayerTiles::Convert(CUIRect Rect, RECTi *pOut)
-{
-	pOut->x = ConvertX(Rect.x);
-	pOut->y = ConvertY(Rect.y);
-	pOut->w = ConvertX(Rect.x+Rect.w+31) - pOut->x;
-	pOut->h = ConvertY(Rect.y+Rect.h+31) - pOut->y;
-}
-
-void CLayerTiles::Snap(CUIRect *pRect)
-{
-	RECTi Out;
-	Convert(*pRect, &Out);
-	pRect->x = Out.x*32.0f;
-	pRect->y = Out.y*32.0f;
-	pRect->w = Out.w*32.0f;
-	pRect->h = Out.h*32.0f;
-}
-
-void CLayerTiles::Clamp(RECTi *pRect)
-{
-	if(pRect->x < 0)
-	{
-		pRect->w += pRect->x;
-		pRect->x = 0;
-	}
-
-	if(pRect->y < 0)
-	{
-		pRect->h += pRect->y;
-		pRect->y = 0;
-	}
-
-	if(pRect->x+pRect->w > m_Width)
-		pRect->w = m_Width - pRect->x;
-
-	if(pRect->y+pRect->h > m_Height)
-		pRect->h = m_Height - pRect->y;
-
-	if(pRect->h < 0)
-		pRect->h = 0;
-	if(pRect->w < 0)
-		pRect->w = 0;
-}
-
-void CLayerTiles::BrushSelecting(CUIRect Rect)
-{
-
-}
-
-int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
-{
-	RECTi r;
-	Convert(Rect, &r);
-	Clamp(&r);
-
-	if(!r.w || !r.h)
-		return 0;
-
-	// create new layers
-	CLayerTiles *pGrabbed = new CLayerTiles(r.w, r.h);
-	pGrabbed->m_pEditor = m_pEditor;
-	pGrabbed->m_Texture = m_Texture;
-	pGrabbed->m_Image = m_Image;
-	pGrabbed->m_Game = m_Game;
-	pBrush->AddLayer(pGrabbed);
-
-	// copy the tiles
-	for(int y = 0; y < r.h; y++)
-		for(int x = 0; x < r.w; x++)
-			pGrabbed->m_pTiles[y*pGrabbed->m_Width+x] = m_pTiles[(r.y+y)*m_Width+(r.x+x)];
-
-	return 1;
-}
-
-void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
-{
-	if(m_Readonly)
-		return;
-
-	Snap(&Rect);
-
-	int sx = ConvertX(Rect.x);
-	int sy = ConvertY(Rect.y);
-	int w = ConvertX(Rect.w);
-	int h = ConvertY(Rect.h);
-
-	CLayerTiles *pLt = static_cast<CLayerTiles*>(pBrush);
-
-	for(int y = 0; y < h; y++)
-	{
-		for(int x = 0; x < w; x++)
-		{
-			int fx = x+sx;
-			int fy = y+sy;
-
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
-				continue;
-
-			if(Empty)
-				m_pTiles[fy*m_Width+fx].m_Index = 1;
-			else
-				m_pTiles[fy*m_Width+fx] = pLt->m_pTiles[(y*pLt->m_Width + x%pLt->m_Width) % (pLt->m_Width*pLt->m_Height)];
-		}
-	}
-	m_pEditor->m_Map.m_Modified = true;
-}
-
 void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 {
 	if(m_Readonly)
@@ -410,12 +303,6 @@ void CLayerTiles::ShowInfo()
 {
 
 }
-
-int CLayerTiles::RenderProperties(CUIRect *pToolBox)
-{
-	return 0;
-}
-
 
 void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 {
