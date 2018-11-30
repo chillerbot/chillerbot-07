@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/demo.h>
-#include <engine/graphics.h>
-#include <engine/textrender.h>
 #include <engine/shared/config.h>
 
 #include <generated/client_data.h>
@@ -52,124 +50,17 @@ void CScoreboard::OnConsoleInit()
 
 void CScoreboard::RenderGoals(float x, float y, float w)
 {
-	float h = 20.0f;
 
-	Graphics()->BlendNormal();
-	CUIRect Rect = {x, y, w, h};
-	RenderTools()->DrawRoundRect(&Rect, vec4(0.0f, 0.0f, 0.0f, 0.25f), 5.0f);
-
-	// render goals
-	y += 2.0f;
-	if(m_pClient->m_GameInfo.m_ScoreLimit)
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), m_pClient->m_GameInfo.m_ScoreLimit);
-		TextRender()->Text(0, x+10.0f, y, 12.0f, aBuf, -1);
-	}
-	if(m_pClient->m_GameInfo.m_TimeLimit)
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), m_pClient->m_GameInfo.m_TimeLimit);
-		float tw = TextRender()->TextWidth(0, 12.0f, aBuf, -1);
-		TextRender()->Text(0, x+w/2-tw/2, y, 12.0f, aBuf, -1);
-	}
-	if(m_pClient->m_GameInfo.m_MatchNum && m_pClient->m_GameInfo.m_MatchCurrent)
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s %d/%d", Localize("Match"), m_pClient->m_GameInfo.m_MatchCurrent, m_pClient->m_GameInfo.m_MatchNum);
-		float tw = TextRender()->TextWidth(0, 12.0f, aBuf, -1);
-		TextRender()->Text(0, x+w-tw-10.0f, y, 12.0f, aBuf, -1);
-	}
 }
 
 float CScoreboard::RenderSpectators(float x, float y, float w)
 {
-	float h = 20.0f;
-
-	int NumSpectators = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(m_pClient->m_aClients[i].m_Active && m_pClient->m_aClients[i].m_Team == TEAM_SPECTATORS)
-			NumSpectators++;
-
-	char aBuf[64];
-	char SpectatorBuf[64];
-	str_format(SpectatorBuf, sizeof(SpectatorBuf), "%s (%d):", Localize("Spectators"), NumSpectators);
-	float tw = TextRender()->TextWidth(0, 12.0f, SpectatorBuf, -1);
-
-	// do all the text without rendering it once
-	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, x, y, 12.0f, TEXTFLAG_ALLOW_NEWLINE);
-	Cursor.m_LineWidth = w-17.0f;
-	Cursor.m_StartX -= tw+3.0f;
-	Cursor.m_MaxLines = 4;
-	bool Multiple = false;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paPlayerInfos[i];
-		if(!pInfo || m_pClient->m_aClients[i].m_Team != TEAM_SPECTATORS)
-			continue;
-
-		if(Multiple)
-			TextRender()->TextEx(&Cursor, ", ", -1);
-		if(g_Config.m_ClShowUserId && Cursor.m_LineCount <= Cursor.m_MaxLines)
-		{
-			Cursor.m_X += Cursor.m_FontSize;
-		}
-		if(m_pClient->m_aClients[i].m_aClan[0])
-		{
-			str_format(aBuf, sizeof(aBuf), "%s ", m_pClient->m_aClients[i].m_aClan);
-			TextRender()->TextEx(&Cursor, aBuf, -1);
-		}
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[i].m_aName, -1);
-		Multiple = true;
-	}
-
-	// background
-	float RectHeight = 3*h+(Cursor.m_Y-Cursor.m_StartY);
-	Graphics()->BlendNormal();
-	CUIRect Rect = {x, y, w, RectHeight};
-	RenderTools()->DrawRoundRect(&Rect, vec4(0.0f, 0.0f, 0.0f, 0.25f), 5.0f);
-
-	// Headline
-	y += 30.0f;
-	TextRender()->Text(0, x+10.0f, y, 12.0f, SpectatorBuf, w-20.0f);
-
-	// spectator names and now render everything
-	x += tw+2.0f+10.0f;
-	Multiple = false;
-	TextRender()->SetCursor(&Cursor, x, y, 12.0f, TEXTFLAG_RENDER|TEXTFLAG_ALLOW_NEWLINE);
-	Cursor.m_LineWidth = w-17.0f;
-	Cursor.m_StartX -= tw+3.0f;
-	Cursor.m_MaxLines = 4;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paPlayerInfos[i];
-		if(!pInfo || m_pClient->m_aClients[i].m_Team != TEAM_SPECTATORS)
-			continue;
-
-		if(Multiple)
-			TextRender()->TextEx(&Cursor, ", ", -1);
-		if(g_Config.m_ClShowUserId && Cursor.m_LineCount <= Cursor.m_MaxLines)
-		{
-			RenderTools()->DrawClientID(TextRender(), &Cursor, i);
-		}
-		if(m_pClient->m_aClients[i].m_aClan[0])
-		{
-			str_format(aBuf, sizeof(aBuf), "%s ", m_pClient->m_aClients[i].m_aClan);
-			TextRender()->TextColor(1.0f, 1.0f, (pInfo->m_PlayerFlags&PLAYERFLAG_WATCHING) ? 0.0f : 1.0f, 0.7f);
-			TextRender()->TextEx(&Cursor, aBuf, -1);
-		}
-		TextRender()->TextColor(1.0f, 1.0f, (pInfo->m_PlayerFlags&PLAYERFLAG_WATCHING) ? 0.0f :	 1.0f, 1.0f);
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[i].m_aName, -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Multiple = true;
-	}
-
-	return RectHeight;
+	return 0.0f;
 }
 
 float CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle, int Align)
 {
+<<<<<<< HEAD
 	if(Team == TEAM_SPECTATORS)
 		return 0.0f;
 
@@ -599,33 +490,19 @@ float CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const c
 	TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 
 	return HeadlineHeight+LineHeight*(m_PlayerLines+1);
+=======
+	return 0.0f;
+>>>>>>> Remove sound and graphics from components
 }
 
 void CScoreboard::RenderRecordingNotification(float x)
 {
-	if(!m_pClient->DemoRecorder()->IsRecording())
-		return;
 
-	//draw the box
-	CUIRect RectBox = {x, 0.0f, 180.0f, 50.0f};
-	vec4 Color = vec4(0.0f, 0.0f, 0.0f, 0.4f);
-	Graphics()->BlendNormal();
-	RenderTools()->DrawUIRect(&RectBox, Color, CUI::CORNER_B, 15.0f);
-
-	//draw the red dot
-	CUIRect RectRedDot = {x+20, 15.0f, 20.0f, 20.0f};
-	Color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	RenderTools()->DrawRoundRect(&RectRedDot, Color, 10.0f);
-
-	//draw the text
-	char aBuf[64];
-	int Seconds = m_pClient->DemoRecorder()->Length();
-	str_format(aBuf, sizeof(aBuf), Localize("REC %3d:%02d"), Seconds/60, Seconds%60);
-	TextRender()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
 }
 
 void CScoreboard::OnRender()
 {
+<<<<<<< HEAD
 	// check if we need to reset the player stats
 	if(!m_SkipPlayerStatsReset && m_pClient->m_Snap.m_pGameData && m_pClient->m_Snap.m_pGameData->m_GameStartTick == Client()->GameTick())
 	{
@@ -720,8 +597,9 @@ void CScoreboard::OnRender()
 			m_SkipPlayerStatsReset = true;
 		}
 	}
+=======
+>>>>>>> Remove sound and graphics from components
 
-	RenderRecordingNotification((Width/7)*4);
 }
 
 void CScoreboard::OnMessage(int MsgType, void *pRawMsg)
