@@ -15,7 +15,6 @@
 
 #include <game/version.h>
 #include "localization.h"
-#include "render.h"
 
 #include "gameclient.h"
 
