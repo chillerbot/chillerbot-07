@@ -124,29 +124,7 @@ void CMenus::DoButton_MenuTabTop_Dummy(const char *pText, int Checked, const CUI
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-<<<<<<< HEAD
-	if(Checked)
-	{
-		RenderTools()->DrawUIRect(pRect, vec4(1,1,1,0.5f), CUI::CORNER_ALL, 5.0f);
-		TextRender()->TextColor(0.0f, 0.0f, 0.0f, 1.0f);
-		TextRender()->TextOutlineColor(1.0f, 1.0f, 1.0f, 0.25f);
-	}
-
-	CUIRect Label;
-	pRect->VMargin(2.0f, &Label);
-	Label.y+=2.0f;
-	UI()->DoLabel(&Label, pText, pRect->h*ms_FontmodHeight*0.8f, CUI::ALIGN_CENTER);
-
-	if(Checked)
-	{
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
-	}
-
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
-=======
 	return 0;
->>>>>>> Remove sound and graphics from components
 }
 
 int CMenus::DoButton_GridHeaderIcon(CButtonContainer *pBC, int ImageID, int SpriteID, const CUIRect *pRect, int Corners)
@@ -249,82 +227,7 @@ int CMenus::UiDoListboxEnd(CListBoxState* pState, bool *pItemActivated)
 
 int CMenus::DoKeyReader(CButtonContainer *pBC, const CUIRect *pRect, int Key, int Modifier, int* NewModifier)
 {
-<<<<<<< HEAD
-	// process
-	static const void *pGrabbedID = 0;
-	static bool MouseReleased = true;
-	static int ButtonUsed = 0;
-	int Inside = UI()->MouseInside(pRect) && UI()->MouseInsideClip();
-	int NewKey = Key;
-	*NewModifier = Modifier;
-
-	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pBC->GetID())
-		MouseReleased = true;
-
-	if(UI()->CheckActiveItem(pBC->GetID()))
-	{
-		if(m_Binder.m_GotKey)
-		{
-			// abort with escape key
-			if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
-			{
-				NewKey = m_Binder.m_Key.m_Key;
-				*NewModifier = m_Binder.m_Modifier;
-			}
-			m_Binder.m_GotKey = false;
-			UI()->SetActiveItem(0);
-			MouseReleased = false;
-			pGrabbedID = pBC->GetID();
-		}
-
-		if(ButtonUsed == 1 && !UI()->MouseButton(1))
-		{
-			if(Inside)
-				NewKey = 0;
-			UI()->SetActiveItem(0);
-		}
-	}
-	else if(UI()->HotItem() == pBC->GetID())
-	{
-		if(MouseReleased)
-		{
-			if(UI()->MouseButton(0))
-			{
-				m_Binder.m_TakeKey = true;
-				m_Binder.m_GotKey = false;
-				UI()->SetActiveItem(pBC->GetID());
-				ButtonUsed = 0;
-			}
-
-			if(UI()->MouseButton(1))
-			{
-				UI()->SetActiveItem(pBC->GetID());
-				ButtonUsed = 1;
-			}
-		}
-	}
-
-	if(Inside)
-		UI()->SetHotItem(pBC->GetID());
-
-	// draw
-	if (UI()->CheckActiveItem(pBC->GetID()) && ButtonUsed == 0)
-		DoButton_KeySelect(pBC, "???", 0, pRect);
-	else
-	{
-		if(Key == 0)
-			DoButton_KeySelect(pBC, "", 0, pRect);
-		else
-		{
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetModifierName(*NewModifier), Input()->KeyName(Key));
-			DoButton_KeySelect(pBC, aBuf, 0, pRect);
-		}
-	}
-	return NewKey;
-=======
 	return 0;
->>>>>>> Remove sound and graphics from components
 }
 
 void CMenus::RenderMenubar(CUIRect Rect)

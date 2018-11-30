@@ -5,12 +5,9 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
-#include <engine/graphics.h>
-#include <engine/textrender.h>
 
 #include <generated/client_data.h>
 #include <game/client/localization.h>
-#include <game/client/render.h>
 #include "editor.h"
 
 
@@ -154,16 +151,7 @@ void CLayerTiles::MakePalette()
 
 void CLayerTiles::Render()
 {
-	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
-		m_Texture = m_pEditor->m_Map.m_lImages[m_Image]->m_Texture;
-	Graphics()->TextureSet(m_Texture);
-	vec4 Color = vec4(m_Color.r/255.0f, m_Color.g/255.0f, m_Color.b/255.0f, m_Color.a/255.0f);
-	Graphics()->BlendNone();
-	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE,
-												m_pEditor->EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
-	Graphics()->BlendNormal();
-	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT,
-												m_pEditor->EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
+
 }
 
 int CLayerTiles::ConvertX(float x) const { return (int)(x/32.0f); }
@@ -215,18 +203,7 @@ void CLayerTiles::Clamp(RECTi *pRect)
 
 void CLayerTiles::BrushSelecting(CUIRect Rect)
 {
-	vec4 FillColor = HexToRgba(g_Config.m_EdColorSelectionTile);
 
-	Graphics()->TextureClear();
-	m_pEditor->Graphics()->QuadsBegin();
-	m_pEditor->Graphics()->SetColor(FillColor.r*FillColor.a, FillColor.g*FillColor.a, FillColor.b*FillColor.a, FillColor.a);
-	Snap(&Rect);
-	IGraphics::CQuadItem QuadItem(Rect.x, Rect.y, Rect.w, Rect.h);
-	m_pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-	m_pEditor->Graphics()->QuadsEnd();
-	char aBuf[16];
-	str_format(aBuf, sizeof(aBuf), "%d,%d", ConvertX(Rect.w), ConvertY(Rect.h));
-	TextRender()->Text(0, Rect.x+3.0f, Rect.y+3.0f, m_pEditor->m_ShowTilePicker?15.0f:15.0f*m_pEditor->m_WorldZoom, aBuf, -1);
 }
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
@@ -431,173 +408,11 @@ void CLayerTiles::Shift(int Direction)
 
 void CLayerTiles::ShowInfo()
 {
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	Graphics()->TextureSet(m_pEditor->Client()->GetDebugFont());
-	Graphics()->QuadsBegin();
 
-	int StartY = max(0, (int)(ScreenY0/32.0f)-1);
-	int StartX = max(0, (int)(ScreenX0/32.0f)-1);
-	int EndY = min((int)(ScreenY1/32.0f)+1, m_Height);
-	int EndX = min((int)(ScreenX1/32.0f)+1, m_Width);
-
-	for(int y = StartY; y < EndY; y++)
-		for(int x = StartX; x < EndX; x++)
-		{
-			int c = x + y*m_Width;
-			if(m_pTiles[c].m_Index)
-			{
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%i", m_pTiles[c].m_Index);
-				m_pEditor->Graphics()->QuadsText(x*32, y*32, 16.0f, aBuf);
-
-				char aFlags[4] = {	m_pTiles[c].m_Flags&TILEFLAG_VFLIP ? 'V' : ' ',
-									m_pTiles[c].m_Flags&TILEFLAG_HFLIP ? 'H' : ' ',
-									m_pTiles[c].m_Flags&TILEFLAG_ROTATE? 'R' : ' ',
-									0};
-				m_pEditor->Graphics()->QuadsText(x*32, y*32+16, 16.0f, aFlags);
-			}
-			x += m_pTiles[c].m_Skip;
-		}
-
-	Graphics()->QuadsEnd();
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
 int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
-	CUIRect Button;
-
-	bool InGameGroup = !find_linear(m_pEditor->m_Map.m_pGameGroup->m_lLayers.all(), this).empty();
-	if(m_pEditor->m_Map.m_pGameLayer != this)
-	{
-		if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size() && m_pEditor->m_Map.m_lImages[m_Image]->m_pAutoMapper)
-		{
-			static int s_AutoMapperButton = 0;
-			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
-			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Auto map", 0, &Button, 0, ""))
-				m_pEditor->PopupSelectConfigAutoMapInvoke(m_pEditor->UI()->MouseX(), m_pEditor->UI()->MouseY());
-
-			bool Proceed = m_pEditor->PopupAutoMapProceedOrder();
-			if(Proceed)
-			{
-				if(m_pEditor->m_Map.m_lImages[m_Image]->m_pAutoMapper->GetType() == IAutoMapper::TYPE_TILESET)
-				{
-					m_pEditor->m_Map.m_lImages[m_Image]->m_pAutoMapper->Proceed(this, m_SelectedRuleSet);
-					return 1; // only close the popup when it's a tileset
-				}
-				else if(m_pEditor->m_Map.m_lImages[m_Image]->m_pAutoMapper->GetType() == IAutoMapper::TYPE_DOODADS)
-					m_pEditor->m_Map.m_lImages[m_Image]->m_pAutoMapper->Proceed(this, m_SelectedRuleSet, m_SelectedAmount);
-			}
-		}
-	}
-	else
-		InGameGroup = false;
-
-	if(InGameGroup)
-	{
-		pToolBox->HSplitBottom(2.0f, pToolBox, 0);
-		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
-		static int s_ColclButton = 0;
-		if(m_pEditor->DoButton_Editor(&s_ColclButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
-			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->UI()->MouseX(), m_pEditor->UI()->MouseY());
-
-		int Result = m_pEditor->PopupSelectGameTileOpResult();
-		if(Result > -1)
-		{
-			CLayerTiles *gl = m_pEditor->m_Map.m_pGameLayer;
-			int w = min(gl->m_Width, m_Width);
-			int h = min(gl->m_Height, m_Height);
-			for(int y = 0; y < h; y++)
-				for(int x = 0; x < w; x++)
-					if(m_pTiles[y*m_Width+x].m_Index)
-						gl->m_pTiles[y*gl->m_Width+x].m_Index = TILE_AIR+Result;
-
-			return 1;
-		}
-	}
-
-	enum
-	{
-		PROP_WIDTH=0,
-		PROP_HEIGHT,
-		PROP_SHIFT,
-		PROP_IMAGE,
-		PROP_COLOR,
-		PROP_COLOR_ENV,
-		PROP_COLOR_ENV_OFFSET,
-		NUM_PROPS,
-	};
-
-	int Color = 0;
-	Color |= m_Color.r<<24;
-	Color |= m_Color.g<<16;
-	Color |= m_Color.b<<8;
-	Color |= m_Color.a;
-
-	CProperty aProps[] = {
-		{"Width", m_Width, PROPTYPE_INT_SCROLL, 1, 1000000000},
-		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 1000000000},
-		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
-		{"Color", Color, PROPTYPE_COLOR, 0, 0},
-		{"Color Env", m_ColorEnv+1, PROPTYPE_INT_STEP, 0, m_pEditor->m_Map.m_lEnvelopes.size()+1},
-		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{0},
-	};
-
-	if(m_pEditor->m_Map.m_pGameLayer == this) // remove the image and color properties if this is the game layer
-	{
-		aProps[3].m_pName = 0;
-		aProps[4].m_pName = 0;
-	}
-
-	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != -1)
-		m_pEditor->m_Map.m_Modified = true;
-
-	if(Prop == PROP_WIDTH && NewVal > 1)
-		Resize(NewVal, m_Height);
-	else if(Prop == PROP_HEIGHT && NewVal > 1)
-		Resize(m_Width, NewVal);
-	else if(Prop == PROP_SHIFT)
-		Shift(NewVal);
-	else if(Prop == PROP_IMAGE)
-	{
-		if (NewVal == -1)
-		{
-			m_Texture.Invalidate();
-			m_Image = -1;
-		}
-		else
-			m_Image = NewVal%m_pEditor->m_Map.m_lImages.size();
-	}
-	else if(Prop == PROP_COLOR)
-	{
-		m_Color.r = (NewVal>>24)&0xff;
-		m_Color.g = (NewVal>>16)&0xff;
-		m_Color.b = (NewVal>>8)&0xff;
-		m_Color.a = NewVal&0xff;
-	}
-	if(Prop == PROP_COLOR_ENV)
-	{
-		int Index = clamp(NewVal-1, -1, m_pEditor->m_Map.m_lEnvelopes.size()-1);
-		int Step = (Index-m_ColorEnv)%2;
-		if(Step != 0)
-		{
-			for(; Index >= -1 && Index < m_pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || m_pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 4)
-				{
-					m_ColorEnv = Index;
-					break;
-				}
-		}
-	}
-	if(Prop == PROP_COLOR_ENV_OFFSET)
-		m_ColorEnvOffset = NewVal;
-
 	return 0;
 }
 

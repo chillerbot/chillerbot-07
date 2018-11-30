@@ -152,12 +152,7 @@ void CBroadcast::OnRender()
 	if(m_pClient->m_pScoreboard->Active() || m_pClient->m_pMotd->IsActive())
 		return;
 
-<<<<<<< HEAD
-	Graphics()->MapScreen(0, 0, 300*Graphics()->ScreenAspect(), 300);
-
-=======
 	// client broadcast
->>>>>>> Server broadcast console only
 	if(Client()->LocalTime() < m_BroadcastTime)
 	{
 		printf("client_broadcast: %s", m_aBroadcastText);
