@@ -14,7 +14,6 @@
 #include <engine/console.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
-#include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/map.h>
@@ -22,7 +21,6 @@
 #include <engine/serverbrowser.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
-#include <engine/textrender.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/compression.h>
@@ -92,62 +90,6 @@ void CGraph::Add(float v, float r, float g, float b)
 	m_aColors[m_Index][1] = g;
 	m_aColors[m_Index][2] = b;
 }
-
-void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription)
-{
-	//m_pGraphics->BlendNormal();
-
-
-	pGraphics->TextureClear();
-
-	pGraphics->QuadsBegin();
-	pGraphics->SetColor(0, 0, 0, 0.75f);
-	IGraphics::CQuadItem QuadItem(x, y, w, h);
-	pGraphics->QuadsDrawTL(&QuadItem, 1);
-	pGraphics->QuadsEnd();
-
-	pGraphics->LinesBegin();
-	pGraphics->SetColor(0.95f, 0.95f, 0.95f, 1.00f);
-	IGraphics::CLineItem LineItem(x, y+h/2, x+w, y+h/2);
-	pGraphics->LinesDraw(&LineItem, 1);
-	pGraphics->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
-	IGraphics::CLineItem Array[2] = {
-		IGraphics::CLineItem(x, y+(h*3)/4, x+w, y+(h*3)/4),
-		IGraphics::CLineItem(x, y+h/4, x+w, y+h/4)};
-	pGraphics->LinesDraw(Array, 2);
-	for(int i = 1; i < MAX_VALUES; i++)
-	{
-		float a0 = (i-1)/(float)MAX_VALUES;
-		float a1 = i/(float)MAX_VALUES;
-		int i0 = (m_Index+i-1)&(MAX_VALUES-1);
-		int i1 = (m_Index+i)&(MAX_VALUES-1);
-
-		float v0 = (m_aValues[i0]-m_Min) / (m_Max-m_Min);
-		float v1 = (m_aValues[i1]-m_Min) / (m_Max-m_Min);
-
-		IGraphics::CColorVertex Array[2] = {
-			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
-			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(Array, 2);
-		IGraphics::CLineItem LineItem(x+a0*w, y+h-v0*h, x+a1*w, y+h-v1*h);
-		pGraphics->LinesDraw(&LineItem, 1);
-
-	}
-	pGraphics->LinesEnd();
-
-	pGraphics->TextureSet(FontTexture);
-	pGraphics->QuadsBegin();
-	pGraphics->QuadsText(x+2, y+h-16, 16, pDescription);
-
-	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%.2f", m_Max);
-	pGraphics->QuadsText(x+w-8*str_length(aBuf)-8, y+2, 16, aBuf);
-
-	str_format(aBuf, sizeof(aBuf), "%.2f", m_Min);
-	pGraphics->QuadsText(x+w-8*str_length(aBuf)-8, y+h-16, 16, aBuf);
-	pGraphics->QuadsEnd();
-}
-
 
 void CSmoothTime::Init(int64 Target)
 {
@@ -644,97 +586,7 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 
 void CClient::DebugRender()
 {
-	static NETSTATS Prev, Current;
-	static int64 LastSnap = 0;
-	static float FrameTimeAvg = 0;
-	int64 Now = time_get();
-	char aBuffer[512];
 
-	if(!g_Config.m_Debug)
-		return;
-
-	//m_pGraphics->BlendNormal();
-	Graphics()->TextureSet(m_DebugFont);
-	Graphics()->MapScreen(0,0,Graphics()->ScreenWidth(),Graphics()->ScreenHeight());
-	Graphics()->QuadsBegin();
-
-	if(time_get()-LastSnap > time_freq())
-	{
-		LastSnap = time_get();
-		Prev = Current;
-		net_stats(&Current);
-	}
-
-	/*
-		eth = 14
-		ip = 20
-		udp = 8
-		total = 42
-	*/
-	FrameTimeAvg = FrameTimeAvg*0.9f + m_RenderFrameTime*0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfxmem: %dk fps: %3d",
-		m_CurGameTick, m_PredTick,
-		Graphics()->MemoryUsage()/1024,
-		(int)(1.0f/FrameTimeAvg + 0.5f));
-	Graphics()->QuadsText(2, 2, 16, aBuffer);
-
-
-	{
-		int SendPackets = (Current.sent_packets-Prev.sent_packets);
-		int SendBytes = (Current.sent_bytes-Prev.sent_bytes);
-		int SendTotal = SendBytes + SendPackets*42;
-		int RecvPackets = (Current.recv_packets-Prev.recv_packets);
-		int RecvBytes = (Current.recv_bytes-Prev.recv_bytes);
-		int RecvTotal = RecvBytes + RecvPackets*42;
-
-		if(!SendPackets) SendPackets++;
-		if(!RecvPackets) RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3d %5d+%4d=%5d (%3d kbps) avg: %5d\nrecv: %3d %5d+%4d=%5d (%3d kbps) avg: %5d",
-			SendPackets, SendBytes, SendPackets*42, SendTotal, (SendTotal*8)/1024, SendBytes/SendPackets,
-			RecvPackets, RecvBytes, RecvPackets*42, RecvTotal, (RecvTotal*8)/1024, RecvBytes/RecvPackets);
-		Graphics()->QuadsText(2, 14, 16, aBuffer);
-	}
-
-	// render rates
-	{
-		int y = 0;
-		int i;
-		for(i = 0; i < 256; i++)
-		{
-			if(m_SnapshotDelta.GetDataRate(i))
-			{
-				str_format(aBuffer, sizeof(aBuffer), "%4d %20s: %8d %8d %8d", i, GameClient()->GetItemName(i), m_SnapshotDelta.GetDataRate(i)/8, m_SnapshotDelta.GetDataUpdates(i),
-					(m_SnapshotDelta.GetDataRate(i)/m_SnapshotDelta.GetDataUpdates(i))/8);
-				Graphics()->QuadsText(2, 100+y*12, 16, aBuffer);
-				y++;
-			}
-		}
-	}
-
-	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms",
-		(int)((m_PredictedTime.Get(Now)-m_GameTime.Get(Now))*1000/(float)time_freq()));
-	Graphics()->QuadsText(2, 70, 16, aBuffer);
-	Graphics()->QuadsEnd();
-
-	// render graphs
-	if(g_Config.m_DbgGraphs)
-	{
-		//Graphics()->MapScreen(0,0,400.0f,300.0f);
-		float w = Graphics()->ScreenWidth()/4.0f;
-		float h = Graphics()->ScreenHeight()/6.0f;
-		float sp = Graphics()->ScreenWidth()/100.0f;
-		float x = Graphics()->ScreenWidth()-w-sp;
-
-		m_FpsGraph.ScaleMax();
-		m_FpsGraph.ScaleMin();
-		m_FpsGraph.Render(Graphics(), m_DebugFont, x, sp*5, w, h, "FPS");
-		m_InputtimeMarginGraph.ScaleMin();
-		m_InputtimeMarginGraph.ScaleMax();
-		m_InputtimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp*5+h+sp, w, h, "Prediction Margin");
-		m_GametimeMarginGraph.ScaleMin();
-		m_GametimeMarginGraph.ScaleMax();
-		m_GametimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp*5+h+sp+h+sp, w, h, "Gametime Margin");
-	}
 }
 
 void CClient::Quit()
@@ -749,11 +601,7 @@ const char *CClient::ErrorString() const
 
 void CClient::Render()
 {
-	if(g_Config.m_GfxClear)
-		Graphics()->Clear(1,1,0);
-
 	GameClient()->OnRender();
-	DebugRender();
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, unsigned WantedCrc)
@@ -1871,7 +1719,6 @@ void CClient::Run()
 	}
 
 	// init font rendering
-	Kernel()->RequestInterface<IEngineTextRender>()->Init();
 
 	// init the input
 	Input()->Init();
@@ -1982,53 +1829,6 @@ void CClient::Run()
 			Input()->MouseModeRelative();
 		}
 
-		// render
-		{
-			if(g_Config.m_ClEditor)
-			{
-				if(!m_EditorActive)
-				{
-					GameClient()->OnActivateEditor();
-					m_EditorActive = true;
-				}
-			}
-			else if(m_EditorActive)
-				m_EditorActive = false;
-
-			Update();
-
-			const bool SkipFrame = LimitFps();
-
-			if(!SkipFrame && (!g_Config.m_GfxAsyncRender || m_pGraphics->IsIdle()))
-			{
-				m_RenderFrames++;
-
-				// update frametime
-				int64 Now = time_get();
-				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
-
-				if(m_RenderFrameTime < m_RenderFrameTimeLow)
-					m_RenderFrameTimeLow = m_RenderFrameTime;
-				if(m_RenderFrameTime > m_RenderFrameTimeHigh)
-					m_RenderFrameTimeHigh = m_RenderFrameTime;
-				m_FpsGraph.Add(1.0f/m_RenderFrameTime, 1,1,1);
-
-				m_LastRenderTime = Now;
-
-				// when we are stress testing only render every 10th frame
-				if(!g_Config.m_DbgStress || (m_RenderFrames%10) == 0 )
-				{
-					if(!m_EditorActive)
-						Render();
-					else
-					{
-						m_pEditor->UpdateAndRender();
-						DebugRender();
-					}
-					m_pGraphics->Swap();
-				}
-			}
-		}
 
 		AutoScreenshot_Cleanup();
 
@@ -2055,23 +1855,6 @@ void CClient::Run()
 			thread_sleep(g_Config.m_DbgHitch);
 			g_Config.m_DbgHitch = 0;
 		}
-
-		/*
-		if(ReportTime < time_get())
-		{
-			if(0 && g_Config.m_Debug)
-			{
-				dbg_msg("client/report", "fps=%.02f (%.02f %.02f) netstate=%d",
-					m_Frames/(float)(ReportInterval/time_freq()),
-					1.0f/m_RenderFrameTimeHigh,
-					1.0f/m_RenderFrameTimeLow,
-					m_NetClient.State());
-			}
-			m_RenderFrameTimeLow = 1;
-			m_RenderFrameTimeHigh = 0;
-			m_RenderFrames = 0;
-			ReportTime += ReportInterval;
-		}*/
 
 		// update local time
 		m_LocalTime = (time_get()-m_LocalStartTime)/(float)time_freq();
@@ -2489,7 +2272,6 @@ int main(int argc, const char **argv) // ignore_convention
 	IConfig *pConfig = CreateConfig();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
-	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 
@@ -2505,9 +2287,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineInput*>(pEngineInput)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IInput*>(pEngineInput));
-
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineTextRender*>(pEngineTextRender)); // register as both
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<ITextRender*>(pEngineTextRender));
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMap*>(pEngineMap)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap*>(pEngineMap));
@@ -2587,7 +2366,6 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pConfig;
 	delete pEngineSound;
 	delete pEngineInput;
-	delete pEngineTextRender;
 	delete pEngineMap;
 	delete pEngineMasterServer;
 
