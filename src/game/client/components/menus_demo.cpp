@@ -11,16 +11,6 @@
 #include "maplayers.h"
 #include "menus.h"
 
-int CMenus::DoButton_DemoPlayer(CButtonContainer *pBC, const char *pText, const CUIRect *pRect)
-{
-	return 0;
-}
-
-void CMenus::RenderDemoPlayer(CUIRect MainView)
-{
-
-}
-
 int CMenus::DemolistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	return 0;
@@ -40,9 +30,4 @@ void CMenus::DemolistOnUpdate(bool Reset)
 	m_DemolistSelectedIndex = Reset ? m_lDemos.size() > 0 ? 0 : -1 :
 										m_DemolistSelectedIndex >= m_lDemos.size() ? m_lDemos.size()-1 : m_DemolistSelectedIndex;
 	m_DemolistSelectedIsDir = m_DemolistSelectedIndex < 0 ? false : m_lDemos[m_DemolistSelectedIndex].m_IsDir;
-}
-
-void CMenus::RenderDemoList(CUIRect MainView)
-{
-
 }

@@ -1677,25 +1677,6 @@ void CClient::Run()
 
 	m_MenuStartTime = time_get();
 
-	// init graphics
-	{
-		m_pGraphics = CreateEngineGraphicsThreaded();
-
-		bool RegisterFail = false;
-		RegisterFail = RegisterFail || !Kernel()->RegisterInterface(static_cast<IEngineGraphics*>(m_pGraphics)); // register graphics as both
-		RegisterFail = RegisterFail || !Kernel()->RegisterInterface(static_cast<IGraphics*>(m_pGraphics));
-
-		if(RegisterFail || m_pGraphics->Init() != 0)
-		{
-			dbg_msg("client", "couldn't init graphics");
-			return;
-		}
-	}
-
-	// init sound, allowed to fail
-	m_SoundInitFailed = Sound()->Init() != 0;
-	Sound()->SetMaxDistance(1.5f*Graphics()->ScreenWidth()/2.0f);
-
 	// open socket
 	{
 		NETADDR BindAddr;

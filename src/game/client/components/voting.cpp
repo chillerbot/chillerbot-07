@@ -298,12 +298,5 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 
 void CVoting::OnRender()
 {
-}
-
-
-void CVoting::RenderBars(CUIRect Bars, bool Text)
-{
 
 }
-
-

@@ -17,11 +17,6 @@
 #include "countryflags.h"
 #include "menus.h"
 
-void CMenus::InvokePopupMenu(void *pID, int Flags, float x, float y, float Width, float Height, int (*pfnFunc)(CMenus *pMenu, CUIRect Rect), void *pExtra)
-{
-
-}
-
 void CMenus::DoPopupMenu()
 {
 
