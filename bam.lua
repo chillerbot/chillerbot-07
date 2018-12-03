@@ -1,7 +1,6 @@
 CheckVersion("0.5")
 
 Import("configure.lua")
-Import("other/sdl/sdl.lua")
 Import("other/freetype/freetype.lua")
 
 --- Setup Config -------
@@ -10,7 +9,6 @@ config:Add(OptCCompiler("compiler"))
 config:Add(OptTestCompileC("stackprotector", "int main(){return 0;}", "-fstack-protector -fstack-protector-all"))
 config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-version-min=10.7 -isysroot /Developer/SDKs/MacOSX10.7.sdk"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
-config:Add(SDL.OptFind("sdl", true))
 config:Add(FreeType.OptFind("freetype", true))
 config:Finalize("config.lua")
 
@@ -158,9 +156,6 @@ function GenerateMacOSXSettings(settings, conf, arch, compiler)
 	-- Client
 	settings.link.frameworks:Add("OpenGL")
 	settings.link.frameworks:Add("AGL")
-	-- FIXME: the SDL config is applied in BuildClient too but is needed here before so the launcher will compile
-	config.sdl:Apply(settings)
-	settings.link.extrafiles:Merge(Compile(settings, "src/osxlaunch/client.m"))
 	BuildClient(settings)
 
 	-- Content
@@ -330,7 +325,6 @@ end
 
 
 function BuildClient(settings, family, platform)
-	config.sdl:Apply(settings)
 	config.freetype:Apply(settings)
 	
 	local client = Compile(settings, Collect("src/engine/client/*.cpp"))

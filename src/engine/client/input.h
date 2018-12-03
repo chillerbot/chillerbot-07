@@ -5,8 +5,6 @@
 
 class CInput : public IEngineInput
 {
-	IEngineGraphics *m_pGraphics;
-
 	int m_InputGrabbed;
 
 	int64 m_LastRelease;
@@ -23,8 +21,6 @@ class CInput : public IEngineInput
 
 	void ClearKeyStates();
 	bool KeyState(int Key) const;
-
-	IEngineGraphics *Graphics() { return m_pGraphics; }
 
 public:
 	CInput();

@@ -47,7 +47,6 @@
 	#include <windows.h>
 #endif
 
-#include "SDL.h"
 #ifdef main
 #undef main
 #endif
@@ -1660,17 +1659,6 @@ void CClient::Run()
 	m_LocalStartTime = time_get();
 	m_SnapshotParts = 0;
 
-	// init SDL
-	{
-		if(SDL_Init(0) < 0)
-		{
-			dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
-			return;
-		}
-
-		atexit(SDL_Quit); // ignore_convention
-	}
-
 	m_MenuStartTime = time_get();
 
 	// open socket
@@ -1749,11 +1737,6 @@ void CClient::Run()
 			Connect(m_aCmdConnect);
 			m_aCmdConnect[0] = 0;
 		}
-
-		// update input
-		if(Input()->Update())
-			break;	// SDL_QUIT
-
 
 		// release focus
 		if(!m_pGraphics->WindowActive())
@@ -1845,11 +1828,6 @@ void CClient::Run()
 	m_pGraphics->Shutdown();
 
 	m_ServerBrowser.SaveServerlist();
-
-	// shutdown SDL
-	{
-		SDL_Quit();
-	}
 }
 
 int64 CClient::TickStartTime(int Tick)
@@ -2069,19 +2047,6 @@ void CClient::ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUse
 
 void CClient::SwitchWindowScreen(int Index)
 {
-	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
-	if(g_Config.m_GfxFullscreen)
-	{
-		ToggleFullscreen();
-		if(Graphics()->SetWindowScreen(Index))
-			g_Config.m_GfxScreen = Index;
-		ToggleFullscreen();
-	}
-	else
-	{
-		if(Graphics()->SetWindowScreen(Index))
-			g_Config.m_GfxScreen = Index;
-	}
 }
 
 void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
