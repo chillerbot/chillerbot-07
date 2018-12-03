@@ -4,6 +4,8 @@
 #define GAME_VARIABLES_H
 #undef GAME_VARIABLES_H // this file will be included several times
 
+// chillerbot 07
+MACRO_CONFIG_STR(ClConnect, cl_connect, 64, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "ip to connect on launch")
 
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict client movements")
