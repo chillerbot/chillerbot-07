@@ -56,7 +56,6 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IEditor *m_pEditor;
 	IEngineInput *m_pInput;
 	IEngineGraphics *m_pGraphics;
-	IEngineSound *m_pSound;
 	IGameClient *m_pGameClient;
 	IEngineMap *m_pMap;
 	IConsole *m_pConsole;
@@ -186,7 +185,6 @@ public:
 	IEngine *Engine() { return m_pEngine; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 	IEngineInput *Input() { return m_pInput; }
-	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }

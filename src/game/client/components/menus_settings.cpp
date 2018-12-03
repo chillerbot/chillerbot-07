@@ -13,7 +13,6 @@
 #include <generated/client_data.h>
 
 #include <game/client/components/maplayers.h>
-#include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/animstate.h>
 

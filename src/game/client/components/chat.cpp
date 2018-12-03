@@ -12,7 +12,6 @@
 #include <game/client/localization.h>
 
 #include <game/client/components/scoreboard.h>
-#include <game/client/components/sounds.h>
 
 #include "menus.h"
 #include "chat.h"
@@ -492,24 +491,21 @@ void CChat::AddLine(int ClientID, int Mode, const char *pLine, int TargetID)
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_SERVER] >= time_freq()*3/10)
 		{
-			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
-			m_aLastSoundPlayed[CHAT_SERVER] = Now;
+			// chat server
 		}
 	}
 	else if(Highlighted || Mode == CHAT_WHISPER)
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq()*3/10)
 		{
-			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
-			m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
+			// chat highlight
 		}
 	}
 	else
 	{
 		if(Now-m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq()*3/10)
 		{
-			m_pClient->m_pSounds->Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
-			m_aLastSoundPlayed[CHAT_CLIENT] = Now;
+			// chat client
 		}
 	}
 }

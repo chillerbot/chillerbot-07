@@ -19,7 +19,6 @@
 #include <engine/map.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
-#include <engine/sound.h>
 #include <engine/storage.h>
 
 #include <engine/shared/config.h>
@@ -187,7 +186,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_pEditor = 0;
 	m_pInput = 0;
 	m_pGraphics = 0;
-	m_pSound = 0;
 	m_pGameClient = 0;
 	m_pMap = 0;
 	m_pConsole = 0;
@@ -1566,8 +1564,6 @@ void CClient::InitInterfaces()
 	// fetch interfaces
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
-	//m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
-	m_pSound = Kernel()->RequestInterface<IEngineSound>();
 	m_pGameClient = Kernel()->RequestInterface<IGameClient>();
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
@@ -1758,8 +1754,6 @@ void CClient::Run()
 		if(Input()->Update())
 			break;	// SDL_QUIT
 
-		// update sound
-		Sound()->Update();
 
 		// release focus
 		if(!m_pGraphics->WindowActive())
@@ -1849,7 +1843,6 @@ void CClient::Run()
 	Disconnect();
 
 	m_pGraphics->Shutdown();
-	m_pSound->Shutdown();
 
 	m_ServerBrowser.SaveServerlist();
 
@@ -2260,7 +2253,6 @@ int main(int argc, const char **argv) // ignore_convention
 	IConsole *pConsole = CreateConsole(FlagMask);
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
-	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
@@ -2271,9 +2263,6 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
-
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineSound*>(pEngineSound)); // register as both
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<ISound*>(pEngineSound));
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineInput*>(pEngineInput)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IInput*>(pEngineInput));
@@ -2354,7 +2343,6 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pConsole;
 	delete pStorage;
 	delete pConfig;
-	delete pEngineSound;
 	delete pEngineInput;
 	delete pEngineMap;
 	delete pEngineMasterServer;
