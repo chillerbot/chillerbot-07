@@ -1,7 +1,6 @@
 CheckVersion("0.5")
 
 Import("configure.lua")
-Import("other/freetype/freetype.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -9,7 +8,6 @@ config:Add(OptCCompiler("compiler"))
 config:Add(OptTestCompileC("stackprotector", "int main(){return 0;}", "-fstack-protector -fstack-protector-all"))
 config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-version-min=10.7 -isysroot /Developer/SDKs/MacOSX10.7.sdk"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
-config:Add(FreeType.OptFind("freetype", true))
 config:Finalize("config.lua")
 
 generated_src_dir = "build/src"
@@ -325,8 +323,6 @@ end
 
 
 function BuildClient(settings, family, platform)
-	config.freetype:Apply(settings)
-	
 	local client = Compile(settings, Collect("src/engine/client/*.cpp"))
 	
 	local game_client = Compile(settings, CollectRecursive("src/game/client/*.cpp"), SharedClientFiles())

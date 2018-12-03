@@ -184,7 +184,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 {
 	m_pEditor = 0;
 	m_pInput = 0;
-	m_pGraphics = 0;
 	m_pGameClient = 0;
 	m_pMap = 0;
 	m_pConsole = 0;
@@ -511,7 +510,6 @@ void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 
 int CClient::LoadData()
 {
-	m_DebugFont = Graphics()->LoadTexture("ui/debug_font.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, IGraphics::TEXLOAD_NORESAMPLE);
 	return 1;
 }
 
@@ -1698,7 +1696,6 @@ void CClient::Run()
 	// init the editor
 	m_pEditor->Init();
 
-
 	// load data
 	if(!LoadData())
 		return;
@@ -1738,62 +1735,6 @@ void CClient::Run()
 			m_aCmdConnect[0] = 0;
 		}
 
-		// release focus
-		if(!m_pGraphics->WindowActive())
-		{
-			if(m_WindowMustRefocus == 0)
-				Input()->MouseModeAbsolute();
-			m_WindowMustRefocus = 1;
-		}
-		else if (g_Config.m_DbgFocus && Input()->KeyPress(KEY_ESCAPE, true))
-		{
-			Input()->MouseModeAbsolute();
-			m_WindowMustRefocus = 1;
-		}
-
-		// refocus
-		if(m_WindowMustRefocus && m_pGraphics->WindowActive())
-		{
-			if(m_WindowMustRefocus < 3)
-			{
-				Input()->MouseModeAbsolute();
-				m_WindowMustRefocus++;
-			}
-
-			if(m_WindowMustRefocus >= 3 || Input()->KeyPress(KEY_MOUSE_1, true))
-			{
-				Input()->MouseModeRelative();
-				m_WindowMustRefocus = 0;
-
-				// update screen in case it got moved
-				int ActScreen = Graphics()->GetWindowScreen();
-				if(ActScreen >= 0 && ActScreen != g_Config.m_GfxScreen)
-					g_Config.m_GfxScreen = ActScreen;
-			}
-		}
-
-		// panic quit button
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && Input()->KeyPress(KEY_Q, true))
-		{
-			Quit();
-			break;
-		}
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && Input()->KeyPress(KEY_D, true))
-			g_Config.m_Debug ^= 1;
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && Input()->KeyPress(KEY_G, true))
-			g_Config.m_DbgGraphs ^= 1;
-
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyIsPressed(KEY_LSHIFT) && Input()->KeyPress(KEY_E, true))
-		{
-			g_Config.m_ClEditor = g_Config.m_ClEditor^1;
-			Input()->MouseModeRelative();
-		}
-
-
-		AutoScreenshot_Cleanup();
-
 		// check conditions
 		if(State() == IClient::STATE_QUITING)
 			break;
@@ -1809,7 +1750,7 @@ void CClient::Run()
 		// beNice
 		if(g_Config.m_ClCpuThrottle)
 			thread_sleep(g_Config.m_ClCpuThrottle);
-		else if(g_Config.m_DbgStress || !m_pGraphics->WindowActive())
+		else if(g_Config.m_DbgStress)
 			thread_sleep(5);
 
 		if(g_Config.m_DbgHitch)
@@ -1824,9 +1765,6 @@ void CClient::Run()
 
 	GameClient()->OnShutdown();
 	Disconnect();
-
-	m_pGraphics->Shutdown();
-
 	m_ServerBrowser.SaveServerlist();
 }
 
@@ -1855,8 +1793,6 @@ void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
-	pSelf->Graphics()->Minimize();
 }
 
 void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
@@ -1872,7 +1808,6 @@ void CClient::AutoScreenshot_Start()
 {
 	if(g_Config.m_ClAutoScreenshot)
 	{
-		Graphics()->TakeScreenshot("auto/autoscreen");
 		m_AutoScreenshotRecycle = true;
 	}
 }
@@ -1893,8 +1828,6 @@ void CClient::AutoScreenshot_Cleanup()
 
 void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
-	pSelf->Graphics()->TakeScreenshot(0);
 }
 
 void CClient::Con_Rcon(IConsole::IResult *pResult, void *pUserData)
@@ -2051,68 +1984,31 @@ void CClient::SwitchWindowScreen(int Index)
 
 void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
-	if(pSelf->Graphics() && pResult->NumArguments())
-	{
-		if(g_Config.m_GfxScreen != pResult->GetInteger(0))
-			pSelf->SwitchWindowScreen(pResult->GetInteger(0));
-	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
 }
 
 void CClient::ToggleFullscreen()
 {
-	if(Graphics()->Fullscreen(g_Config.m_GfxFullscreen^1))
-		g_Config.m_GfxFullscreen ^= 1;
 }
 
 void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
-	if(pSelf->Graphics() && pResult->NumArguments())
-	{
-		if(g_Config.m_GfxFullscreen != pResult->GetInteger(0))
-			pSelf->ToggleFullscreen();
-	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
 }
 
 void CClient::ToggleWindowBordered()
 {
 	g_Config.m_GfxBorderless ^= 1;
-	Graphics()->SetWindowBordered(!g_Config.m_GfxBorderless);
 }
 
 void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
-	if(pSelf->Graphics() && pResult->NumArguments())
-	{
-		if(!g_Config.m_GfxFullscreen && (g_Config.m_GfxBorderless != pResult->GetInteger(0)))
-			pSelf->ToggleWindowBordered();
-	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
 }
 
 void CClient::ToggleWindowVSync()
 {
-	if(Graphics()->SetVSync(g_Config.m_GfxVsync^1))
-		g_Config.m_GfxVsync ^= 1;
 }
 
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
-	if(pSelf->Graphics() && pResult->NumArguments())
-	{
-		if(g_Config.m_GfxVsync != pResult->GetInteger(0))
-			pSelf->ToggleWindowVSync();
-	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
 }
 
 void CClient::RegisterCommands()
@@ -2172,31 +2068,6 @@ extern "C" int SDL_main(int argc, char **argv_) // ignore_convention
 #else
 int main(int argc, const char **argv) // ignore_convention
 {
-#endif
-#if defined(CONF_FAMILY_WINDOWS)
-	#ifdef CONF_RELEASE
-	bool HideConsole = true;
-	#else
-	bool HideConsole = false;
-	#endif
-	for(int i = 1; i < argc; i++) // ignore_convention
-	{
-		if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0) // ignore_convention
-		{
-			HideConsole = false;
-			break;
-		}
-		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
-		{
-			HideConsole = true;
-			break;
-		}
-	}
-
-	if(HideConsole)
-		FreeConsole();
-#endif
-
 	bool UseDefaultConfig = false;
 	for(int i = 1; i < argc; i++) // ignore_convention
 	{
