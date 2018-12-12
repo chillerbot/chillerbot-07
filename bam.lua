@@ -1,8 +1,6 @@
 CheckVersion("0.5")
 
 Import("configure.lua")
-Import("other/sdl/sdl.lua")
-Import("other/freetype/freetype.lua")
 
 --- Setup Config -------
 config = NewConfig()
@@ -10,8 +8,6 @@ config:Add(OptCCompiler("compiler"))
 config:Add(OptTestCompileC("stackprotector", "int main(){return 0;}", "-fstack-protector -fstack-protector-all"))
 config:Add(OptTestCompileC("minmacosxsdk", "int main(){return 0;}", "-mmacosx-version-min=10.7 -isysroot /Developer/SDKs/MacOSX10.7.sdk"))
 config:Add(OptLibrary("zlib", "zlib.h", false))
-config:Add(SDL.OptFind("sdl", true))
-config:Add(FreeType.OptFind("freetype", true))
 config:Finalize("config.lua")
 
 generated_src_dir = "build/src"
@@ -158,8 +154,6 @@ function GenerateMacOSXSettings(settings, conf, arch, compiler)
 	-- Client
 	settings.link.frameworks:Add("OpenGL")
 	settings.link.frameworks:Add("AGL")
-	-- FIXME: the SDL config is applied in BuildClient too but is needed here before so the launcher will compile
-	config.sdl:Apply(settings)
 	BuildClient(settings)
 
 	-- Content
@@ -274,7 +268,7 @@ function SharedCommonFiles()
 	if not shared_common_files then
 		local network_source = ContentCompile("network_source", "generated/protocol.cpp")
 		local network_header = ContentCompile("network_header", "generated/protocol.h")
-		AddDependency(network_source, network_header)
+		AddDependency(network_source, network_header, "src/engine/shared/protocol.h")
 
 		local nethash = CHash("generated/nethash.cpp", "src/engine/shared/protocol.h", "src/game/tuning.h", "src/game/gamecore.cpp", network_header)
 		shared_common_files = {network_source, nethash}
@@ -329,9 +323,6 @@ end
 
 
 function BuildClient(settings, family, platform)
-	config.sdl:Apply(settings)
-	config.freetype:Apply(settings)
-	
 	local client = Compile(settings, Collect("src/engine/client/*.cpp"))
 	
 	local game_client = Compile(settings, CollectRecursive("src/game/client/*.cpp"), SharedClientFiles())

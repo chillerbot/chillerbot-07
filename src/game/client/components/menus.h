@@ -20,6 +20,7 @@ class CMenusKeyBinder : public CComponent
 public:
 	bool m_TakeKey;
 	bool m_GotKey;
+	int m_Modifier;
 	IInput::CEvent m_Key;
 	CMenusKeyBinder();
 	virtual bool OnInput(IInput::CEvent Event);
@@ -155,6 +156,27 @@ private:
 
 	static int ThemeScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	// gametype icons
+	class CGameIcon
+	{
+	public:
+		enum
+		{
+			GAMEICON_FULL=0,
+			GAMEICON_ON,
+			GAMEICON_OFF,
+		};
+		CGameIcon() {};
+		CGameIcon(const char *pName) : m_Name(pName) {}
+
+		string m_Name;
+		IGraphics::CTextureHandle m_IconTexture;
+	};
+	array<CGameIcon> m_lGameIcons;
+	IGraphics::CTextureHandle m_GameIconDefault;
+	void DoGameIcon(const char *pName, const CUIRect *pRect, int Type);
+	static int GameIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 
 	int64 m_LastInput;
 

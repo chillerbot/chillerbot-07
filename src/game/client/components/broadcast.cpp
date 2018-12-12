@@ -69,6 +69,7 @@ void CBroadcast::DoBroadcast(const char *pText)
 void CBroadcast::OnReset()
 {
 	m_BroadcastTime = 0;
+	m_SrvBroadcastReceivedTime = 0;
 }
 
 void CBroadcast::OnMessage(int MsgType, void* pRawMsg)
@@ -144,6 +145,10 @@ void CBroadcast::OnMessage(int MsgType, void* pRawMsg)
 
 void CBroadcast::OnRender()
 {
+	// server broadcast
+	RenderServerBroadcast();
+
+	// client broadcast
 	if(m_pClient->m_pScoreboard->Active() || m_pClient->m_pMotd->IsActive())
 		return;
 
@@ -152,8 +157,5 @@ void CBroadcast::OnRender()
 	{
 		printf("client_broadcast: %s", m_aBroadcastText);
 	}
-
-	// server broadcast
-	RenderServerBroadcast();
 }
 

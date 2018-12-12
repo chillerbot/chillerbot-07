@@ -84,7 +84,6 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderVoting()
 {
-
 }
 
 void CHud::RenderCursor()
@@ -105,6 +104,18 @@ void CHud::RenderHealthAndAmmo(const CNetObj_Character *pCharacter)
 void CHud::RenderSpectatorHud()
 {
 
+}
+
+void CHud::RenderSpectatorNotification()
+{
+	if(m_pClient->m_aClients[m_pClient->m_LocalClientID].m_Team == TEAM_SPECTATORS &&
+		m_pClient->m_TeamChangeTime + 5.0f >= Client()->LocalTime())
+	{
+		const char *pText = Localize("Click on a player or a flag to follow it");
+		float FontSize = 16.0f;
+		float w = TextRender()->TextWidth(0, FontSize, pText, -1);
+		TextRender()->Text(0, 150 * Graphics()->ScreenAspect() + -w / 2, 30, FontSize, pText, -1);
+	}
 }
 
 void CHud::OnRender()

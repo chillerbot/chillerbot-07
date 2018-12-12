@@ -185,6 +185,7 @@ public:
 	int m_LocalClientID;
 	int m_TeamCooldownTick;
 	bool m_MuteServerBroadcast;
+	float m_TeamChangeTime;
 
 	struct CGameInfo
 	{

@@ -42,7 +42,6 @@
 #include "components/nameplates.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
-#include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/voting.h"
 
@@ -64,7 +63,6 @@ static CDebugHud gs_DebugHud;
 static CControls gs_Controls;
 static CEffects gs_Effects;
 static CScoreboard gs_Scoreboard;
-static CSounds gs_Sounds;
 static CEmoticon gs_Emoticon;
 static CDamageInd gsDamageInd;
 static CVoting gs_Voting;
@@ -139,7 +137,6 @@ void CGameClient::OnConsoleInit()
 {
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pClient = Kernel()->RequestInterface<IClient>();
-	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -162,7 +159,6 @@ void CGameClient::OnConsoleInit()
 	m_pCamera = &::gs_Camera;
 	m_pControls = &::gs_Controls;
 	m_pEffects = &::gs_Effects;
-	m_pSounds = &::gs_Sounds;
 	m_pMotd = &::gs_Motd;
 	m_pDamageind = &::gsDamageInd;
 	m_pMapimages = &::gs_MapImages;
@@ -179,9 +175,9 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pEffects); // doesn't render anything, just updates effects
 	m_All.Add(m_pParticles); // doesn't render anything, just updates all the particles
 	m_All.Add(m_pBinds);
+	m_All.Add(&m_pBinds->m_SpecialBinds);
 	m_All.Add(m_pControls);
 	m_All.Add(m_pCamera);
-	m_All.Add(m_pSounds);
 	m_All.Add(m_pVoting);
 
 	m_All.Add(&gs_MapLayersBackGround); // first to render
@@ -203,6 +199,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&gs_Scoreboard);
 	m_All.Add(m_pMotd);
 	m_All.Add(m_pMenus);
+	m_All.Add(&m_pMenus->m_Binder);
 	m_All.Add(m_pGameConsole);
 
 	// build the input stack
@@ -338,6 +335,7 @@ void CGameClient::OnReset()
 
 	m_LocalClientID = -1;
 	m_TeamCooldownTick = 0;
+	m_TeamChangeTime = 0.0f;
 	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
 	m_DemoSpecMode = SPEC_FREEVIEW;
 	m_DemoSpecID = -1;
@@ -505,12 +503,10 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 			case GAMEMSG_CTF_DROP:
 				if(m_SuppressEvents)
 					return;
-				m_pSounds->Enqueue(CSounds::CHN_GLOBAL, SOUND_CTF_DROP);
 				break;
 			case GAMEMSG_CTF_RETURN:
 				if(m_SuppressEvents)
 					return;
-				m_pSounds->Enqueue(CSounds::CHN_GLOBAL, SOUND_CTF_RETURN);
 				break;
 			case GAMEMSG_TEAM_BALANCE_VICTIM:
 				str_format(aBuf, sizeof(aBuf), Localize(gs_GameMsgList[GameMsgID].m_pText), GetTeamName(aParaI[0], m_GameInfo.m_GameFlags&GAMEFLAG_TEAMS));
@@ -523,12 +519,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 								((m_Snap.m_SpecInfo.m_SpectatorID != -1 && m_aClients[m_Snap.m_SpecInfo.m_SpectatorID].m_Team != aParaI[0]) ||
 								(m_Snap.m_SpecInfo.m_SpecMode == SPEC_FLAGRED && aParaI[0] != TEAM_RED) ||
 								(m_Snap.m_SpecInfo.m_SpecMode == SPEC_FLAGBLUE && aParaI[0] != TEAM_BLUE)))))
-					m_pSounds->Enqueue(CSounds::CHN_GLOBAL, SOUND_CTF_GRAB_PL);
-				else
-					m_pSounds->Enqueue(CSounds::CHN_GLOBAL, SOUND_CTF_GRAB_EN);
 				break;
 			case GAMEMSG_CTF_CAPTURE:
-				m_pSounds->Enqueue(CSounds::CHN_GLOBAL, SOUND_CTF_CAPTURE);
 				int ClientID = clamp(aParaI[1], 0, MAX_CLIENTS - 1);
 				if(aParaI[2] <= 60*Client()->GameTickSpeed())
 					str_format(aBuf, sizeof(aBuf), Localize("The %s flag was captured by '%2d: %s' (%.2f seconds)"), aParaI[0] ? Localize("blue") : Localize("red"),
@@ -594,6 +586,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 				return;
 			}
 			m_LocalClientID = pMsg->m_ClientID;
+			m_TeamChangeTime = Client()->LocalTime();
 		}
 		else
 		{
@@ -715,6 +708,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 
 			if(pMsg->m_ClientID == m_LocalClientID)
 				m_TeamCooldownTick = pMsg->m_CooldownTick;
+			m_TeamChangeTime = Client()->LocalTime();
 		}
 
 		if(pMsg->m_Silent == 0)
@@ -793,10 +787,10 @@ void CGameClient::ProcessEvents()
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(SnapType, Index, &Item);
 
-		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
+		if(Item.m_Type == NETEVENTTYPE_DAMAGE)
 		{
-			CNetEvent_DamageInd *ev = (CNetEvent_DamageInd *)pData;
-			m_pEffects->DamageIndicator(vec2(ev->m_X, ev->m_Y), direction(ev->m_Angle/256.0f));
+			CNetEvent_Damage *ev = (CNetEvent_Damage *)pData;
+			m_pEffects->DamageIndicator(vec2(ev->m_X, ev->m_Y), ev->m_HealthAmount + ev->m_ArmorAmount);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_EXPLOSION)
 		{
@@ -820,8 +814,6 @@ void CGameClient::ProcessEvents()
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
 		{
-			CNetEvent_SoundWorld *ev = (CNetEvent_SoundWorld *)pData;
-			m_pSounds->PlayAt(CSounds::CHN_WORLD, ev->m_SoundID, 1.0f, vec2(ev->m_X, ev->m_Y));
 		}
 	}
 }
@@ -830,21 +822,6 @@ void CGameClient::ProcessTriggeredEvents(int Events, vec2 Pos)
 {
 	if(m_SuppressEvents)
 		return;
-
-	if(Events&COREEVENTFLAG_GROUND_JUMP)
-		m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_JUMP, 1.0f, Pos);
-	if(Events&COREEVENTFLAG_AIR_JUMP)
-		m_pEffects->AirJump(Pos);
-	if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
-		m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_HOOK_ATTACH_PLAYER, 1.0f, Pos);
-	if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND)
-		m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_HOOK_ATTACH_GROUND, 1.0f, Pos);
-	if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK)
-		m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_HOOK_NOATTACH, 1.0f, Pos);
-	/*if(Events&COREEVENTFLAG_HOOK_LAUNCH)
-		m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_HOOK_LOOP, 1.0f, Pos);
-	if(Events&COREEVENTFLAG_HOOK_RETRACT)
-		m_pSounds->PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_JUMP, 1.0f, Pos);*/
 }
 
 void CGameClient::OnNewSnapshot()

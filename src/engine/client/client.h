@@ -55,8 +55,6 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IEngine *m_pEngine;
 	IEditor *m_pEditor;
 	IEngineInput *m_pInput;
-	IEngineGraphics *m_pGraphics;
-	IEngineSound *m_pSound;
 	IGameClient *m_pGameClient;
 	IEngineMap *m_pMap;
 	IConsole *m_pConsole;
@@ -81,8 +79,6 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 	unsigned m_SnapshotParts;
 	int64 m_LocalStartTime;
-
-	IGraphics::CTextureHandle m_DebugFont;
 
 	int64 m_LastRenderTime;
 	int64 m_LastCpuTime;
@@ -184,9 +180,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 
 public:
 	IEngine *Engine() { return m_pEngine; }
-	IEngineGraphics *Graphics() { return m_pGraphics; }
 	IEngineInput *Input() { return m_pInput; }
-	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IStorage *Storage() { return m_pStorage; }
@@ -208,8 +202,6 @@ public:
 	virtual bool ConnectionProblems() const;
 
 	virtual bool SoundInitFailed() const { return m_SoundInitFailed; }
-
-	virtual IGraphics::CTextureHandle GetDebugFont() const { return m_DebugFont; }
 
 	void SendInput();
 

@@ -12,7 +12,6 @@
 #include <game/client/components/flow.h>
 #include <game/client/components/skins.h>
 #include <game/client/components/effects.h>
-#include <game/client/components/sounds.h>
 #include <game/client/components/controls.h>
 
 #include "players.h"
